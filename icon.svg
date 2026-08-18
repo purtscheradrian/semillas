@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#2d6a4f"/>
+  <!-- Hoja / semilla -->
+  <ellipse cx="256" cy="200" rx="90" ry="130" fill="#74c69d" transform="rotate(-20 256 200)"/>
+  <ellipse cx="256" cy="200" rx="90" ry="130" fill="#52b788" transform="rotate(20 256 200)"/>
+  <!-- Tallo -->
+  <rect x="247" y="300" width="18" height="120" rx="9" fill="#40916c"/>
+  <!-- Raíz izquierda -->
+  <path d="M256 390 Q220 420 210 450" stroke="#40916c" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <!-- Raíz derecha -->
+  <path d="M256 390 Q292 420 302 450" stroke="#40916c" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <!-- Nervio central hoja -->
+  <path d="M256 100 Q248 200 256 310" stroke="#2d6a4f" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.5"/>
+</svg>

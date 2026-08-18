@@ -1,0 +1,12 @@
+{
+  "name": "Sistema de Gestión de Semillas",
+  "short_name": "Semillas GE",
+  "description": "Sistema ERP para laboratorio de semillas",
+  "start_url": "./sistema_semillas.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2d6a4f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
