@@ -19,14 +19,11 @@
 *{box-sizing:border-box}
 body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 
-/* WELCOME */
-#welcome{position:fixed;inset:0;background:var(--gd);display:flex;align-items:center;justify-content:center;z-index:9999}
-#welcome .box{background:#fff;border-radius:20px;padding:48px 52px;max-width:460px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-#welcome h2{color:var(--gd);font-weight:800;margin-bottom:8px}
-#welcome p{color:#64748b;margin-bottom:28px}
-#welcome .btn-sel{background:var(--gd);color:#fff;border:none;padding:14px 32px;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .15s}
-#welcome .btn-sel:hover{background:var(--gm)}
-#welcome .folder-chip{background:#f0fdf4;border:1px solid var(--gl);border-radius:8px;padding:8px 14px;font-size:.85rem;color:var(--gd);margin-top:16px;display:none}
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--gd);display:none;align-items:center;justify-content:center;z-index:9999}
+#login-screen .box{background:#fff;border-radius:20px;padding:40px 44px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+#login-screen h2{color:var(--gd);font-weight:800;margin-bottom:6px}
+#login-screen p{color:#64748b;margin-bottom:24px;font-size:.92rem}
 
 /* LAYOUT */
 #sidebar{width:var(--sw);height:100vh;background:var(--gd);position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;overflow:hidden}
@@ -97,27 +94,72 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 
 /* PRINT */
 @media print{#sidebar,.no-print{display:none!important}#main{margin-left:0!important}body{background:#fff}.card{border:1px solid #ccc!important}}
+
+/* RESPONSIVE MOBILE */
+#topbar{display:none;background:var(--gd);color:#fff;padding:10px 16px;align-items:center;gap:12px;position:sticky;top:0;z-index:90}
+#topbar-title{font-weight:700;font-size:.95rem;flex:1}
+.hamburger{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:2px 6px}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+
+@media(max-width:767px){
+  :root{--sw:260px}
+  #sidebar{transform:translateX(-100%);transition:transform .25s ease;z-index:200}
+  #sidebar.open{transform:translateX(0)}
+  #sidebar-overlay.open{display:block}
+  #main{margin-left:0!important}
+  #topbar{display:flex}
+  .page-header{display:none}
+  .content-area{padding:12px}
+  .table-responsive-mobile{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .stat-card .svalue{font-size:1.1rem}
+  .modal-dialog{margin:8px}
+}
+@media(min-width:768px){
+  #topbar{display:none!important}
+}
 </style>
 </head>
 <body>
 
-<!-- ===== PANTALLA BIENVENIDA ===== -->
-<div id="welcome">
+<!-- ===== PANTALLA LOGIN ===== -->
+<div id="login-screen">
   <div class="box">
-    <div style="font-size:3rem;margin-bottom:12px">🌿</div>
+    <div style="font-size:3rem;margin-bottom:10px">🌿</div>
     <h2>Sistema de Semillas</h2>
-    <p>Conectando con la base de datos...</p>
-    <div id="wlc-status" style="color:#94a3b8;font-size:.85rem;margin-top:12px">Iniciando...</div>
+    <p>Ingresá tus credenciales para continuar</p>
+    <div class="mb-3 text-start">
+      <label class="form-label fw-semibold" style="font-size:.85rem">Usuario</label>
+      <input type="text" class="form-control" id="login-usuario" placeholder="USUARIO" autocomplete="username"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pin').focus()">
+    </div>
+    <div class="mb-4 text-start">
+      <label class="form-label fw-semibold" style="font-size:.85rem">PIN</label>
+      <input type="password" class="form-control" id="login-pin" placeholder="••••••••" maxlength="8" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn btn-success w-100 fw-semibold" style="padding:10px;font-size:1rem" onclick="login()">
+      <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+    </button>
+    <div id="login-error" style="color:#b91c1c;font-size:.83rem;margin-top:12px;min-height:18px"></div>
   </div>
 </div>
 
-<!-- ===== SIDEBAR ===== -->
+<!-- ===== APP ===== -->
 <div id="app">
+<div id="topbar">
+  <button class="hamburger" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+  <span id="topbar-title">Sistema de Semillas</span>
+</div>
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ===== SIDEBAR ===== -->
 <nav id="sidebar">
   <div class="brand">
     <p class="brand-title"><i class="bi bi-leaf-fill"></i> Sistema de Semillas</p>
     <div class="brand-sub">Gestión integral de campo</div>
     <div class="folder-info" id="sb-folder" style="color:#a7f3d0;margin-top:4px">☁️ Nube activa</div>
+    <div id="sb-usuario" style="color:#a7f3d0;font-size:.72rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
   </div>
 
   <div class="sidebar-nav">
@@ -147,11 +189,13 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
     <a href="#" class="nav-link" onclick="showPage('especies')"><i class="bi bi-tree"></i> Especies</a>
     <a href="#" class="nav-link" onclick="showPage('variedades')"><i class="bi bi-diagram-2"></i> Variedades</a>
     <a href="#" class="nav-link" onclick="showPage('costos')"><i class="bi bi-cash-coin"></i> Costos Limpieza</a>
+    <a href="#" class="nav-link" id="nav-usuarios" onclick="showPage('usuarios')" style="display:none"><i class="bi bi-person-lock"></i> Usuarios</a>
   </div>
 
   <div class="sidebar-bottom">
     <div class="save-indicator" id="save-ind"></div>
-    <button class="btn btn-sm btn-outline-light w-100" onclick="recargarDatos()"><i class="bi bi-arrow-clockwise me-1"></i>Recargar datos</button>
+    <button class="btn btn-sm btn-outline-light w-100 mb-1" onclick="recargarDatos()"><i class="bi bi-arrow-clockwise me-1"></i>Recargar datos</button>
+    <button class="btn btn-sm btn-outline-danger w-100" onclick="logout()"><i class="bi bi-box-arrow-left me-1"></i>Cerrar sesión</button>
   </div>
 </nav>
 
@@ -542,6 +586,24 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
   </div>
 </div>
 
+<!-- USUARIOS -->
+<div id="page-usuarios" class="page">
+  <div class="page-header">
+    <h4><i class="bi bi-person-lock me-2 text-danger"></i>Usuarios del sistema</h4>
+    <button class="btn btn-danger btn-sm" onclick="nuevoUsuario()"><i class="bi bi-plus-lg me-1"></i>Nuevo Usuario</button>
+  </div>
+  <div class="content-area"><div class="card"><div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 table-sm">
+        <thead class="table-light"><tr>
+          <th>Usuario</th><th>Nombre</th><th>Rol</th><th>Módulos permitidos</th><th>Estado</th><th class="no-print"></th>
+        </tr></thead>
+        <tbody id="tb-usuarios"></tbody>
+      </table>
+    </div>
+  </div></div></div>
+</div>
+
 </div><!-- /main -->
 </div><!-- /app -->
 
@@ -896,6 +958,49 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
   </div>
 </div></div></div>
 
+<!-- USUARIO -->
+<div class="modal fade" id="mUsu" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-lock me-2"></i>Usuario</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <input type="hidden" id="usu-id">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Usuario <span class="req">*</span></label>
+        <input class="form-control" id="usu-usuario" placeholder="USUARIO" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Nombre completo <span class="req">*</span></label>
+        <input class="form-control" id="usu-nombre" placeholder="Nombre Apellido">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Rol <span class="req">*</span></label>
+        <select class="form-select" id="usu-rol" onchange="toggleRolModulos()">
+          <option value="usuario">usuario</option>
+          <option value="admin">admin</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">PIN</label>
+        <input type="password" class="form-control" id="usu-pin" placeholder="Dejar vacío para no cambiar" maxlength="8">
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="usu-activo" checked>
+          <label class="form-check-label fw-semibold" for="usu-activo">Activo</label>
+        </div>
+      </div>
+      <div class="col-12" id="usu-modulos-section">
+        <label class="form-label fw-semibold">Módulos permitidos</label>
+        <div id="usu-modulos-cont" class="border rounded p-2" style="max-height:200px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-success btn-sm" onclick="guardarUsuario()"><i class="bi bi-check-lg me-1"></i>Guardar</button>
+  </div>
+</div></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
 // =====================================================================
@@ -904,6 +1009,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 const SUPABASE_URL = 'https://ccbochzansbphletjztp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_4ub1hB80NNzOC6lwO3uogQ_FbbANmVI';
 let sb;
+let currentUser = null;
 
 // Datos en memoria (misma estructura que antes)
 const data = {
@@ -911,10 +1017,10 @@ const data = {
   proveedores: [], articulos: [],
   lotes: [], procesamientos: [], costos_lote: [],
   compras: [], reservas: [], remitos_venta: [],
-  analisis: []
+  analisis: [], usuarios_app: []
 };
 
-const MASTER = ['clientes','especies','variedades','servicios_limpieza','proveedores','articulos'];
+const MASTER = ['clientes','especies','variedades','servicios_limpieza','proveedores','articulos','usuarios_app'];
 const OPS    = ['lotes','procesamientos','costos_lote','compras','reservas','remitos_venta','analisis'];
 const ALL_TABLES = [...MASTER, ...OPS];
 
@@ -986,33 +1092,108 @@ async function recargarDatos() {
   toast('Datos actualizados','s');
 }
 
+// ---- Login / Auth ----
+async function hashPIN(pin) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(pin)));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function login() {
+  const usuario = document.getElementById('login-usuario').value.trim().toUpperCase();
+  const pin = document.getElementById('login-pin').value.trim();
+  if(!usuario || !pin) { toast('Ingresá usuario y PIN','e'); return; }
+  const h = await hashPIN(pin);
+  const {data:rows} = await sb.from('usuarios_app').select('*').eq('usuario', usuario).eq('pin_hash', h).eq('activo', true);
+  if(!rows || !rows.length) { toast('Usuario o PIN incorrecto','e'); return; }
+  currentUser = rows[0];
+  await cargarTodo();
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderSidebar();
+  renderDashboard();
+  document.getElementById('sb-usuario').textContent = '👤 ' + currentUser.nombre;
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-usuario').value='';
+  document.getElementById('login-pin').value='';
+}
+
+function canAccess(modulo) {
+  if(!currentUser) return false;
+  if(currentUser.rol === 'admin') return true;
+  const mods = currentUser.modulos || [];
+  return Array.isArray(mods) ? mods.includes(modulo) : false;
+}
+
+function renderSidebar() {
+  if(!currentUser) return;
+  const MAP = {
+    'lotes':'lotes','procesamiento':'procesamiento','stock':'stock_limpieza',
+    'entregados':'entregados','informe':'informe_lote','reportes':'reportes',
+    'analisis':'analisis','etiquetas':'impresiones','stock-gral':'stock_general',
+    'compras':'compras','reservas':'reservas','remitos-venta':'remitos',
+    'clientes':'clientes','proveedores':'proveedores','articulos':'articulos',
+    'especies':'especies','variedades':'variedades','costos':'costos_limpieza',
+  };
+  document.getElementById('nav-usuarios').style.display = currentUser.rol==='admin' ? '' : 'none';
+  if(currentUser.rol !== 'admin') {
+    Object.entries(MAP).forEach(([page, mod]) => {
+      const el = document.querySelector(`.nav-link[onclick*="'${page}'"]`);
+      if(el) el.style.display = canAccess(mod) ? '' : 'none';
+    });
+  }
+}
+
 // ---- Inicio de la app ----
 async function iniciarApp() {
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const st = document.getElementById('wlc-status');
-  try {
-    if(st) st.textContent = 'Conectando con la base de datos...';
-    await cargarTodo();
-    document.getElementById('welcome').style.display='none';
-    document.getElementById('app').style.display='block';
-    renderDashboard();
-  } catch(e) {
-    if(st) st.textContent = '❌ Error de conexión. Verificá la conexión a internet.';
-    console.error(e);
-  }
+  document.getElementById('login-screen').style.display='flex';
 }
 
 // =====================================================================
 // UI helpers
 // =====================================================================
 function showPage(name) {
+  closeSidebar();
+  // Permission check
+  const MAP = {
+    'lotes':'lotes','procesamiento':'procesamiento','stock':'stock_limpieza',
+    'entregados':'entregados','informe':'informe_lote','reportes':'reportes',
+    'analisis':'analisis','etiquetas':'impresiones','stock-gral':'stock_general',
+    'compras':'compras','reservas':'reservas','remitos-venta':'remitos',
+    'clientes':'clientes','proveedores':'proveedores','articulos':'articulos',
+    'especies':'especies','variedades':'variedades','costos':'costos_limpieza',
+    'usuarios':'_admin'
+  };
+  if(name !== 'dashboard' && currentUser && currentUser.rol !== 'admin') {
+    const mod = MAP[name];
+    if(mod && !canAccess(mod)) { toast('Sin acceso a este módulo','e'); return; }
+  }
+  if(name === 'usuarios' && currentUser && currentUser.rol !== 'admin') { toast('Solo administradores','e'); return; }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
   const pg=document.getElementById('page-'+name);
   if(pg) pg.classList.add('active');
   document.querySelectorAll(`.nav-link[onclick*="'${name}'"]`).forEach(l=>l.classList.add('active'));
-  const fn={dashboard:renderDashboard,lotes:renderLotes,procesamiento:renderProcesamiento,stock:renderStock,entregados:renderEntregados,clientes:renderClientes,especies:renderEspecies,variedades:renderVariedades,costos:renderServicios,proveedores:renderProveedores,articulos:renderArticulos,'stock-gral':renderStockGral,compras:renderCompras,reservas:renderReservas,'remitos-venta':renderRemitosVenta,informe:initInforme,reportes:()=>{},analisis:renderAnalisis,etiquetas:renderEtiquetas};
+  // Update topbar title
+  const titles = {dashboard:'Dashboard',lotes:'Lotes',procesamiento:'Procesamiento',stock:'Stock Limpieza',entregados:'Entregados',informe:'Informe por Lote',reportes:'Reportes',analisis:'Análisis',etiquetas:'Impresiones','stock-gral':'Stock General',compras:'Compras',reservas:'Reservas','remitos-venta':'Remitos Venta',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos:'Costos Limpieza',usuarios:'Usuarios'};
+  const tt = document.getElementById('topbar-title');
+  if(tt) tt.textContent = titles[name] || 'Sistema de Semillas';
+  const fn={dashboard:renderDashboard,lotes:renderLotes,procesamiento:renderProcesamiento,stock:renderStock,entregados:renderEntregados,clientes:renderClientes,especies:renderEspecies,variedades:renderVariedades,costos:renderServicios,proveedores:renderProveedores,articulos:renderArticulos,'stock-gral':renderStockGral,compras:renderCompras,reservas:renderReservas,'remitos-venta':renderRemitosVenta,informe:initInforme,reportes:()=>{},analisis:renderAnalisis,etiquetas:renderEtiquetas,usuarios:renderUsuarios};
   if(fn[name]) fn[name]();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
 }
 function toast(msg,type='s') {
   const d=document.createElement('div');d.className='tm '+type;d.textContent=msg;
@@ -2943,6 +3124,100 @@ function imprimirAnalisis(id){
   const win = window.open('','_blank','width=860,height=720');
   win.document.open(); win.document.write(html); win.document.close();
   win.focus(); setTimeout(()=>win.print(),700);
+}
+
+// =====================================================================
+// USUARIOS
+// =====================================================================
+async function renderUsuarios() {
+  const rows = await dbAll('usuarios_app');
+  const tb = document.getElementById('tb-usuarios');
+  if(!rows.length) { tb.innerHTML='<tr><td colspan="6" class="text-center text-muted py-3">Sin usuarios</td></tr>'; return; }
+  tb.innerHTML = rows.map(u => `
+    <tr>
+      <td class="fw-semibold">${u.usuario}</td>
+      <td>${u.nombre}</td>
+      <td><span class="badge ${u.rol==='admin'?'bg-danger':'bg-secondary'}">${u.rol}</span></td>
+      <td style="font-size:.8rem">${u.rol==='admin'?'Todos':formatModulos(u.modulos)}</td>
+      <td><span class="badge ${u.activo?'bg-success':'bg-secondary'}">${u.activo?'Activo':'Inactivo'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="editUsuario(${u.id})"><i class="bi bi-pencil"></i></button>
+        ${u.usuario!=='ADMIN'?`<button class="btn btn-sm btn-outline-danger" onclick="eliminarUsuario(${u.id})"><i class="bi bi-trash"></i></button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+function formatModulos(mods) {
+  if(!mods || !mods.length) return '<span class="text-muted">Ninguno</span>';
+  const LABELS = {lotes:'Lotes',procesamiento:'Procesamiento',stock_limpieza:'Stock Limp.',entregados:'Entregados',informe_lote:'Informe Lote',reportes:'Reportes',analisis:'Análisis',impresiones:'Impresiones',stock_general:'Stock Gral.',compras:'Compras',reservas:'Reservas',remitos:'Remitos',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos_limpieza:'Costos'};
+  return mods.map(m=>LABELS[m]||m).join(', ');
+}
+
+async function editUsuario(id) {
+  const u = id ? await dbGet('usuarios_app', id) : {id:'',usuario:'',nombre:'',rol:'usuario',modulos:[],activo:true};
+  document.getElementById('usu-id').value = u.id||'';
+  document.getElementById('usu-usuario').value = u.usuario||'';
+  document.getElementById('usu-nombre').value = u.nombre||'';
+  document.getElementById('usu-rol').value = u.rol||'usuario';
+  document.getElementById('usu-pin').value = '';
+  document.getElementById('usu-activo').checked = u.activo!==false;
+  renderModulosCheck(u.modulos||[]);
+  toggleRolModulos();
+  new bootstrap.Modal(document.getElementById('mUsu')).show();
+}
+
+function nuevoUsuario() { editUsuario(null); }
+
+const ALL_MODULOS = [
+  {key:'lotes',label:'Lotes'},{key:'procesamiento',label:'Procesamiento'},
+  {key:'stock_limpieza',label:'Stock Limpieza'},{key:'entregados',label:'Entregados'},
+  {key:'informe_lote',label:'Informe por Lote'},{key:'reportes',label:'Reportes'},
+  {key:'analisis',label:'Análisis'},{key:'impresiones',label:'Impresiones'},
+  {key:'stock_general',label:'Stock General'},{key:'compras',label:'Compras'},
+  {key:'reservas',label:'Reservas'},{key:'remitos',label:'Remitos Venta'},
+  {key:'clientes',label:'Clientes/Productores'},{key:'proveedores',label:'Proveedores'},
+  {key:'articulos',label:'Artículos'},{key:'especies',label:'Especies'},
+  {key:'variedades',label:'Variedades'},{key:'costos_limpieza',label:'Costos Limpieza'},
+];
+
+function renderModulosCheck(selected) {
+  const cont = document.getElementById('usu-modulos-cont');
+  cont.innerHTML = ALL_MODULOS.map(m=>`
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="mod-${m.key}" value="${m.key}" ${selected.includes(m.key)?'checked':''}>
+      <label class="form-check-label" for="mod-${m.key}" style="font-size:.82rem">${m.label}</label>
+    </div>`).join('');
+}
+
+function toggleRolModulos() {
+  const isAdmin = document.getElementById('usu-rol').value === 'admin';
+  document.getElementById('usu-modulos-section').style.display = isAdmin ? 'none' : '';
+}
+
+async function guardarUsuario() {
+  const usuario = document.getElementById('usu-usuario').value.trim().toUpperCase();
+  const nombre = document.getElementById('usu-nombre').value.trim();
+  const rol = document.getElementById('usu-rol').value;
+  const pin = document.getElementById('usu-pin').value.trim();
+  const activo = document.getElementById('usu-activo').checked;
+  if(!usuario || !nombre) { toast('Usuario y nombre son obligatorios','e'); return; }
+  const id = document.getElementById('usu-id').value;
+  if(!id && !pin) { toast('El PIN es obligatorio para usuarios nuevos','e'); return; }
+  const modulos = Array.from(document.querySelectorAll('#usu-modulos-cont input:checked')).map(i=>i.value);
+  const obj = {usuario, nombre, rol, activo, modulos};
+  if(id) obj.id = Number(id);
+  if(pin) obj.pin_hash = await hashPIN(pin);
+  await dbPut('usuarios_app', obj);
+  bootstrap.Modal.getInstance(document.getElementById('mUsu')).hide();
+  toast('Usuario guardado');
+  renderUsuarios();
+}
+
+async function eliminarUsuario(id) {
+  if(!confirm('¿Eliminar este usuario?')) return;
+  await dbDel('usuarios_app', id);
+  toast('Usuario eliminado');
+  renderUsuarios();
 }
 
 // =====================================================================
