@@ -179,11 +179,11 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
     <a href="#" class="nav-link" onclick="showPage('analisis')"><i class="bi bi-clipboard2-pulse"></i> Análisis</a>
     <a href="#" class="nav-link" onclick="showPage('etiquetas')"><i class="bi bi-printer"></i> Impresiones</a>
 
-    <div class="nav-section">🛒 Compras y Ventas</div>
+    <div class="nav-section">🛒 Ingresos y Egresos</div>
     <a href="#" class="nav-link" onclick="showPage('stock-gral')"><i class="bi bi-boxes"></i> Stock General</a>
-    <a href="#" class="nav-link" onclick="showPage('compras')"><i class="bi bi-cart-plus"></i> Compras</a>
+    <a href="#" class="nav-link" onclick="showPage('compras')"><i class="bi bi-cart-plus"></i> Ingresos</a>
     <a href="#" class="nav-link" onclick="showPage('reservas')"><i class="bi bi-bookmark-check"></i> Reservas</a>
-    <a href="#" class="nav-link" onclick="showPage('remitos-venta')"><i class="bi bi-receipt"></i> Remitos Venta</a>
+    <a href="#" class="nav-link" onclick="showPage('remitos-venta')"><i class="bi bi-receipt"></i> Egresos</a>
 
     <div class="nav-section">⚙️ Configuración</div>
     <a href="#" class="nav-link" onclick="showPage('clientes')"><i class="bi bi-people"></i> Clientes / Productores</a>
@@ -219,13 +219,13 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
       <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-truck"></i></div><div><div class="slabel">Lotes entregados</div><div class="svalue" id="st-e">–</div></div></div></div>
     </div>
 
-    <!-- Sección Compras y Ventas -->
-    <div class="mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#64748b">🛒 Compras y Ventas</div>
+    <!-- Sección Ingresos y Egresos -->
+    <div class="mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#64748b">🛒 Ingresos y Egresos</div>
     <div class="row g-3 mb-3">
       <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-success bg-opacity-10 text-success"><i class="bi bi-boxes"></i></div><div><div class="slabel">Artículos en stock</div><div class="svalue" id="st-art">–</div></div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-info bg-opacity-10 text-info"><i class="bi bi-cart-check"></i></div><div><div class="slabel">Compras registradas</div><div class="svalue" id="st-comp">–</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-info bg-opacity-10 text-info"><i class="bi bi-cart-check"></i></div><div><div class="slabel">Ingresos registrados</div><div class="svalue" id="st-comp">–</div></div></div></div>
       <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-bookmark-check"></i></div><div><div class="slabel">Reservas activas</div><div class="svalue" id="st-res">–</div></div></div></div>
-      <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-receipt"></i></div><div><div class="slabel">Remitos emitidos</div><div class="svalue" id="st-remi">–</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-receipt"></i></div><div><div class="slabel">Egresos emitidos</div><div class="svalue" id="st-remi">–</div></div></div></div>
     </div>
 
     <!-- Gráfico Ganancias por Servicio -->
@@ -247,7 +247,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
         </table></div></div>
       </div>
       <div class="col-md-5">
-        <div class="card mb-3"><div class="card-header"><i class="bi bi-cart me-1 text-info"></i>Últimas compras</div>
+        <div class="card mb-3"><div class="card-header"><i class="bi bi-cart me-1 text-info"></i>Últimos ingresos</div>
           <div class="card-body p-0"><table class="table table-hover mb-0 table-sm">
             <thead class="table-light"><tr><th>Doc.</th><th>Proveedor</th><th>Fecha</th><th class="text-end">Items</th></tr></thead>
             <tbody id="db-compras-tb"></tbody>
@@ -392,7 +392,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 <!-- STOCK GENERAL -->
 <div id="page-stock-gral" class="page">
   <div class="page-header"><h4><i class="bi bi-boxes me-2 text-primary"></i>Stock General</h4>
-    <span class="text-muted small">Artículos disponibles según compras y remitos emitidos</span></div>
+    <span class="text-muted small">Artículos disponibles según ingresos y egresos emitidos</span></div>
   <div class="content-area">
     <div class="row g-3 mb-3" id="sgral-cards"></div>
     <div class="card"><div class="card-header">Detalle por artículo</div>
@@ -407,8 +407,8 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 
 <!-- COMPRAS -->
 <div id="page-compras" class="page">
-  <div class="page-header"><h4><i class="bi bi-cart-plus me-2 text-success"></i>Compras</h4>
-    <button class="btn btn-success btn-sm" onclick="abrirModalCompra()"><i class="bi bi-plus-lg me-1"></i>Nueva Compra</button></div>
+  <div class="page-header"><h4><i class="bi bi-cart-plus me-2 text-success"></i>Ingresos</h4>
+    <button class="btn btn-success btn-sm" onclick="abrirModalCompra()"><i class="bi bi-plus-lg me-1"></i>Nuevo Ingreso</button></div>
   <div class="content-area"><div class="card"><div class="card-body p-0">
     <table class="table table-hover mb-0 table-sm"><thead class="table-light"><tr>
       <th>N° Documento</th><th>Tipo</th><th>Proveedor</th><th>Fecha</th><th>Ítems</th><th>Observaciones</th><th class="no-print"></th>
@@ -427,10 +427,10 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
   </div></div></div>
 </div>
 
-<!-- REMITOS VENTA -->
+<!-- EGRESOS -->
 <div id="page-remitos-venta" class="page">
-  <div class="page-header"><h4><i class="bi bi-receipt me-2 text-primary"></i>Remitos de Venta</h4>
-    <button class="btn btn-primary btn-sm" onclick="abrirModalRemito()"><i class="bi bi-plus-lg me-1"></i>Nuevo Remito</button></div>
+  <div class="page-header"><h4><i class="bi bi-receipt me-2 text-primary"></i>Egresos</h4>
+    <button class="btn btn-primary btn-sm" onclick="abrirModalRemito()"><i class="bi bi-plus-lg me-1"></i>Nuevo Egreso</button></div>
   <div class="content-area"><div class="card"><div class="card-body p-0">
     <table class="table table-hover mb-0 table-sm"><thead class="table-light"><tr>
       <th>N° Remito</th><th>Tipo</th><th>Cliente</th><th>Fecha</th><th>Matrícula</th><th>Ítems</th><th>Observaciones</th><th class="no-print"></th>
@@ -817,7 +817,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 
 <!-- COMPRA -->
 <div class="modal fade" id="mCompra" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content">
-  <div class="modal-header bg-success bg-opacity-10"><h5 class="modal-title"><i class="bi bi-cart-plus me-2"></i>Compra / Ingreso de mercadería</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-header bg-success bg-opacity-10"><h5 class="modal-title"><i class="bi bi-cart-plus me-2"></i>Ingreso de mercadería</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body"><input type="hidden" id="cmp-id">
     <div class="row g-3 mb-3">
       <div class="col-md-3"><label class="form-label">Tipo documento</label>
@@ -1193,7 +1193,7 @@ function showPage(name) {
   if(pg) pg.classList.add('active');
   document.querySelectorAll(`.nav-link[onclick*="'${name}'"]`).forEach(l=>l.classList.add('active'));
   // Update topbar title
-  const titles = {dashboard:'Dashboard',lotes:'Lotes',procesamiento:'Procesamiento',stock:'Stock Limpieza',entregados:'Entregados',informe:'Informe por Lote',reportes:'Reportes',analisis:'Análisis',etiquetas:'Impresiones','stock-gral':'Stock General',compras:'Compras',reservas:'Reservas','remitos-venta':'Remitos Venta',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos:'Costos Limpieza',usuarios:'Usuarios'};
+  const titles = {dashboard:'Dashboard',lotes:'Lotes',procesamiento:'Procesamiento',stock:'Stock Limpieza',entregados:'Entregados',informe:'Informe por Lote',reportes:'Reportes',analisis:'Análisis',etiquetas:'Impresiones','stock-gral':'Stock General',compras:'Ingresos',reservas:'Reservas','remitos-venta':'Egresos',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos:'Costos Limpieza',usuarios:'Usuarios'};
   const tt = document.getElementById('topbar-title');
   if(tt) tt.textContent = titles[name] || 'Sistema de Semillas';
   const fn={dashboard:renderDashboard,lotes:renderLotes,procesamiento:renderProcesamiento,stock:renderStock,entregados:renderEntregados,clientes:renderClientes,especies:renderEspecies,variedades:renderVariedades,costos:renderServicios,proveedores:renderProveedores,articulos:renderArticulos,'stock-gral':renderStockGral,compras:renderCompras,reservas:renderReservas,'remitos-venta':renderRemitosVenta,informe:initInforme,reportes:()=>{},analisis:renderAnalisis,etiquetas:renderEtiquetas,usuarios:renderUsuarios};
@@ -1755,11 +1755,11 @@ async function exportarPDF(){
 <title>Informe ${l.numero_lote}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff;padding:3mm 4mm}
+body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff;padding:3mm 4mm;width:72mm;max-width:72mm;overflow:hidden}
 h2{font-size:11px;color:#2d6a4f;font-weight:700;margin:0}
 .sec-title{font-size:8px;color:#2d6a4f;font-weight:700;border-bottom:1.5px solid #74c69d;padding-bottom:2px;margin:6px 0 4px}
-.two-col{display:flex;gap:6px;margin-bottom:6px}
-.two-col>div{flex:1}
+.two-col{display:flex;gap:4px;margin-bottom:6px}
+.two-col>div{flex:1;min-width:0;overflow:hidden}
 table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:7px}
 th{background:#f0fdf4;color:#2d6a4f;padding:2px 3px;text-align:left;border:1px solid #c6e9d4;font-weight:700}
 td{padding:2px 3px;border:1px solid #e2e8f0;vertical-align:top}
@@ -1909,7 +1909,7 @@ async function renderDashboard(){
   ctb.innerHTML=compras.length?[...compras].sort((a,b)=>b.id-a.id).slice(0,5).map(c=>`<tr>
     <td><span class="lbadge" style="background:#e0f2fe;color:#0369a1">${c.tipo||''} ${c.numero_documento||''}</span></td>
     <td>${provM[c.proveedor_id]||'–'}</td><td>${fmtDate(c.fecha)}</td>
-    <td class="text-end fw-semibold">${(c.items||[]).length}</td></tr>`).join(''):'<tr><td colspan="4" class="text-center text-muted py-3">Sin compras</td></tr>';
+    <td class="text-end fw-semibold">${(c.items||[]).length}</td></tr>`).join(''):'<tr><td colspan="4" class="text-center text-muted py-3">Sin ingresos</td></tr>';
 
   // === Tabla reservas activas ===
   const rtb=document.getElementById('db-reservas-tb');
@@ -2116,7 +2116,7 @@ async function renderCompras(){
   const[comps,provs]=await Promise.all([dbAll('compras'),dbAll('proveedores')]);
   const pM=Object.fromEntries(provs.map(p=>[p.id,p.nombre]));
   const tb=document.getElementById('compras-tb');
-  if(!comps.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="bi bi-cart-plus"></i>Sin compras registradas</div></td></tr>`;return}
+  if(!comps.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="bi bi-cart-plus"></i>Sin ingresos registrados</div></td></tr>`;return}
   tb.innerHTML=[...comps].sort((a,b)=>b.id-a.id).map(c=>`<tr>
     <td><span class="lbadge">${c.numero_documento||'S/N'}</span></td>
     <td><span class="badge bg-secondary">${c.tipo||'Remito'}</span></td>
@@ -2170,9 +2170,9 @@ async function guardarCompra(){
   const id=document.getElementById('cmp-id').value;
   const o={tipo:document.getElementById('cmp-tipo').value,numero_documento:document.getElementById('cmp-ndoc').value.trim(),fecha,proveedor_id:Number(document.getElementById('cmp-prov').value)||null,observaciones:document.getElementById('cmp-obs').value.trim(),items:_compraItems.filter(it=>it.articulo_id)};
   if(!o.items.length){toast('Seleccioná artículo en cada ítem','e');return}
-  if(id)o.id=Number(id);await dbPut('compras',o);bootstrap.Modal.getInstance(document.getElementById('mCompra')).hide();toast('Compra guardada');renderCompras();
+  if(id)o.id=Number(id);await dbPut('compras',o);bootstrap.Modal.getInstance(document.getElementById('mCompra')).hide();toast('Ingreso guardado');renderCompras();
 }
-async function delCompra(id){if(!confirm('¿Eliminar esta compra?'))return;await dbDel('compras',id);toast('Eliminada');renderCompras()}
+async function delCompra(id){if(!confirm('¿Eliminar este ingreso?'))return;await dbDel('compras',id);toast('Eliminado');renderCompras()}
 
 // =====================================================================
 // RESERVAS
@@ -2520,7 +2520,7 @@ async function imprimirRemito(id){
 <title>Remito ${r.numero_remito||'S/N'}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff}
+body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff;width:72mm;max-width:72mm;overflow:hidden}
 @page{size:80mm auto;margin:3mm 4mm}
 @media print{body{padding:0}}
 </style></head><body>
@@ -2605,7 +2605,7 @@ function imprimirRegistroMuestreo(){
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
   <style>
     @page{size:80mm auto;margin:3mm 4mm}
-    body{font-family:Arial,sans-serif;color:#000;margin:0;font-size:7pt}
+    body{font-family:Arial,sans-serif;color:#000;margin:0;font-size:7pt;width:72mm;max-width:72mm;overflow:hidden}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style></head><body>
 
@@ -2739,7 +2739,7 @@ function imprimirEtiquetas(){
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
   <style>
     @page{size:80mm auto;margin:3mm}
-    body{margin:0;padding:0;font-family:Arial,sans-serif}
+    body{margin:0;padding:0;font-family:Arial,sans-serif;width:72mm;max-width:72mm;overflow:hidden}
     .lbl{page-break-after:always}
     .lbl:last-child{page-break-after:avoid}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
@@ -3192,7 +3192,7 @@ async function renderUsuarios() {
 
 function formatModulos(mods) {
   if(!mods || !mods.length) return '<span class="text-muted">Ninguno</span>';
-  const LABELS = {lotes:'Lotes',procesamiento:'Procesamiento',stock_limpieza:'Stock Limp.',entregados:'Entregados',informe_lote:'Informe Lote',reportes:'Reportes',analisis:'Análisis',impresiones:'Impresiones',stock_general:'Stock Gral.',compras:'Compras',reservas:'Reservas',remitos:'Remitos',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos_limpieza:'Costos'};
+  const LABELS = {lotes:'Lotes',procesamiento:'Procesamiento',stock_limpieza:'Stock Limp.',entregados:'Entregados',informe_lote:'Informe Lote',reportes:'Reportes',analisis:'Análisis',impresiones:'Impresiones',stock_general:'Stock Gral.',compras:'Ingresos',reservas:'Reservas',remitos:'Egresos',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos_limpieza:'Costos'};
   return mods.map(m=>LABELS[m]||m).join(', ');
 }
 
@@ -3216,8 +3216,8 @@ const ALL_MODULOS = [
   {key:'stock_limpieza',label:'Stock Limpieza'},{key:'entregados',label:'Entregados'},
   {key:'informe_lote',label:'Informe por Lote'},{key:'reportes',label:'Reportes'},
   {key:'analisis',label:'Análisis'},{key:'impresiones',label:'Impresiones'},
-  {key:'stock_general',label:'Stock General'},{key:'compras',label:'Compras'},
-  {key:'reservas',label:'Reservas'},{key:'remitos',label:'Remitos Venta'},
+  {key:'stock_general',label:'Stock General'},{key:'compras',label:'Ingresos'},
+  {key:'reservas',label:'Reservas'},{key:'remitos',label:'Egresos'},
   {key:'clientes',label:'Clientes/Productores'},{key:'proveedores',label:'Proveedores'},
   {key:'articulos',label:'Artículos'},{key:'especies',label:'Especies'},
   {key:'variedades',label:'Variedades'},{key:'costos_limpieza',label:'Costos Limpieza'},
