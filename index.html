@@ -184,6 +184,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
     <a href="#" class="nav-link" onclick="showPage('compras')"><i class="bi bi-cart-plus"></i> Ingresos</a>
     <a href="#" class="nav-link" onclick="showPage('reservas')"><i class="bi bi-bookmark-check"></i> Reservas</a>
     <a href="#" class="nav-link" onclick="showPage('remitos-venta')"><i class="bi bi-receipt"></i> Egresos</a>
+    <a href="#" class="nav-link" onclick="showPage('ajustes')"><i class="bi bi-arrow-left-right"></i> Ajustes / Devoluciones</a>
 
     <div class="nav-section">⚙️ Configuración</div>
     <a href="#" class="nav-link" onclick="showPage('clientes')"><i class="bi bi-people"></i> Clientes / Productores</a>
@@ -435,6 +436,17 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
     <table class="table table-hover mb-0 table-sm"><thead class="table-light"><tr>
       <th>N° Remito</th><th>Tipo</th><th>Cliente</th><th>Fecha</th><th>Matrícula</th><th>Ítems</th><th>Observaciones</th><th class="no-print"></th>
     </tr></thead><tbody id="remitos-venta-tb"></tbody></table>
+  </div></div></div>
+</div>
+
+<!-- AJUSTES DE STOCK -->
+<div id="page-ajustes" class="page">
+  <div class="page-header"><h4><i class="bi bi-arrow-left-right me-2 text-warning"></i>Ajustes / Devoluciones</h4>
+    <button class="btn btn-warning btn-sm text-dark" onclick="abrirModalAjuste()"><i class="bi bi-plus-lg me-1"></i>Nuevo Ajuste</button></div>
+  <div class="content-area"><div class="card"><div class="card-body p-0">
+    <table class="table table-hover mb-0 table-sm"><thead class="table-light"><tr>
+      <th>N° Documento</th><th>Tipo</th><th>Artículo</th><th>Cantidad</th><th>Motivo</th><th>Fecha</th><th class="no-print"></th>
+    </tr></thead><tbody id="ajustes-tb"></tbody></table>
   </div></div></div>
 </div>
 
@@ -880,6 +892,57 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
   <div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary btn-sm" onclick="guardarRemito()"><i class="bi bi-check-lg me-1"></i>Guardar</button></div>
 </div></div></div>
 
+<!-- AJUSTE DE STOCK MODAL -->
+<div class="modal fade" id="mAjuste" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+  <div class="modal-header bg-warning bg-opacity-10"><h5 class="modal-title"><i class="bi bi-arrow-left-right me-2"></i>Ajuste de Stock / Devolución</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="aj-id">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">N° Documento</label>
+        <input class="form-control" id="aj-num" placeholder="Auto">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Fecha <span class="req">*</span></label>
+        <input type="date" class="form-control" id="aj-fecha">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Tipo <span class="req">*</span></label>
+        <select class="form-select" id="aj-tipo" onchange="ajOnTipoChange()">
+          <option value="">-- Seleccionar --</option>
+          <option value="ajuste_baja">Baja por rotura / daño (reduce stock)</option>
+          <option value="devolucion">Devolución de cliente (suma stock)</option>
+          <option value="ajuste_entrada">Ingreso por ajuste / hallazgo (suma stock)</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Artículo <span class="req">*</span></label>
+        <select class="form-select" id="aj-art" onchange="ajOnArtChange()">
+          <option value="">-- Seleccionar artículo --</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Cantidad <span class="req">*</span></label>
+        <input type="number" class="form-control" id="aj-cant" min="0.01" step="0.01" placeholder="0">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Stock actual</label>
+        <input class="form-control" id="aj-stock-ro" readonly style="background:#f8f9fa;font-weight:600">
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold">Motivo / Observaciones</label>
+        <textarea class="form-control" id="aj-motivo" rows="2" placeholder="Ej: Bidon roto en depósito, devolución cliente Pedro García..."></textarea>
+      </div>
+      <div class="col-12">
+        <div id="aj-alerta" class="alert alert-info py-2 d-none" style="font-size:.88rem"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-warning btn-sm text-dark" onclick="guardarAjuste()"><i class="bi bi-check-lg me-1"></i>Guardar Ajuste</button>
+  </div>
+</div></div></div>
+
 <!-- ANÁLISIS MODAL -->
 <div class="modal fade" id="mAnalisis" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content">
   <div class="modal-header bg-success bg-opacity-10"><h5 class="modal-title"><i class="bi bi-clipboard2-pulse me-2"></i>Análisis de Semillas</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -1148,7 +1211,7 @@ function renderSidebar() {
     'lotes':'lotes','procesamiento':'procesamiento','stock':'stock_limpieza',
     'entregados':'entregados','informe':'informe_lote','reportes':'reportes',
     'analisis':'analisis','etiquetas':'impresiones','stock-gral':'stock_general',
-    'compras':'compras','reservas':'reservas','remitos-venta':'remitos',
+    'compras':'compras','reservas':'reservas','remitos-venta':'remitos','ajustes':'remitos',
     'clientes':'clientes','proveedores':'proveedores','articulos':'articulos',
     'especies':'especies','variedades':'variedades','costos':'costos_limpieza',
   };
@@ -1177,7 +1240,7 @@ function showPage(name) {
     'lotes':'lotes','procesamiento':'procesamiento','stock':'stock_limpieza',
     'entregados':'entregados','informe':'informe_lote','reportes':'reportes',
     'analisis':'analisis','etiquetas':'impresiones','stock-gral':'stock_general',
-    'compras':'compras','reservas':'reservas','remitos-venta':'remitos',
+    'compras':'compras','reservas':'reservas','remitos-venta':'remitos','ajustes':'remitos',
     'clientes':'clientes','proveedores':'proveedores','articulos':'articulos',
     'especies':'especies','variedades':'variedades','costos':'costos_limpieza',
     'usuarios':'_admin'
@@ -1193,10 +1256,10 @@ function showPage(name) {
   if(pg) pg.classList.add('active');
   document.querySelectorAll(`.nav-link[onclick*="'${name}'"]`).forEach(l=>l.classList.add('active'));
   // Update topbar title
-  const titles = {dashboard:'Dashboard',lotes:'Lotes',procesamiento:'Procesamiento',stock:'Stock Limpieza',entregados:'Entregados',informe:'Informe por Lote',reportes:'Reportes',analisis:'Análisis',etiquetas:'Impresiones','stock-gral':'Stock General',compras:'Ingresos',reservas:'Reservas','remitos-venta':'Egresos',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos:'Costos Limpieza',usuarios:'Usuarios'};
+  const titles = {dashboard:'Dashboard',lotes:'Lotes',procesamiento:'Procesamiento',stock:'Stock Limpieza',entregados:'Entregados',informe:'Informe por Lote',reportes:'Reportes',analisis:'Análisis',etiquetas:'Impresiones','stock-gral':'Stock General',compras:'Ingresos',reservas:'Reservas','remitos-venta':'Egresos',ajustes:'Ajustes de Stock',clientes:'Clientes',proveedores:'Proveedores',articulos:'Artículos',especies:'Especies',variedades:'Variedades',costos:'Costos Limpieza',usuarios:'Usuarios'};
   const tt = document.getElementById('topbar-title');
   if(tt) tt.textContent = titles[name] || 'Sistema de Semillas';
-  const fn={dashboard:renderDashboard,lotes:renderLotes,procesamiento:renderProcesamiento,stock:renderStock,entregados:renderEntregados,clientes:renderClientes,especies:renderEspecies,variedades:renderVariedades,costos:renderServicios,proveedores:renderProveedores,articulos:renderArticulos,'stock-gral':renderStockGral,compras:renderCompras,reservas:renderReservas,'remitos-venta':renderRemitosVenta,informe:initInforme,reportes:()=>{},analisis:renderAnalisis,etiquetas:renderEtiquetas,usuarios:renderUsuarios};
+  const fn={dashboard:renderDashboard,lotes:renderLotes,procesamiento:renderProcesamiento,stock:renderStock,entregados:renderEntregados,clientes:renderClientes,especies:renderEspecies,variedades:renderVariedades,costos:renderServicios,proveedores:renderProveedores,articulos:renderArticulos,'stock-gral':renderStockGral,compras:renderCompras,reservas:renderReservas,'remitos-venta':renderRemitosVenta,ajustes:renderAjustes,informe:initInforme,reportes:()=>{},analisis:renderAnalisis,etiquetas:renderEtiquetas,usuarios:renderUsuarios};
   if(fn[name]) fn[name]();
 }
 
@@ -2064,7 +2127,7 @@ function calcStockArticulo(articulo_id, exclude_remito_id=null){
   let salida=0;
   remitos.forEach(r=>{
     if(r.id===exclude_remito_id)return;
-    const factor=(r.tipo_remito==='devolucion')?-1:1; // devolucion vuelve al stock
+    const factor=(r.tipo_remito==='devolucion'||r.tipo_remito==='ajuste_entrada')?-1:1; // devolucion/ajuste_entrada vuelve al stock
     (r.items||[]).forEach(it=>{if(it.articulo_id===articulo_id)salida+=(it.cantidad||0)*factor});
   });
   return entrada-salida;
@@ -2074,7 +2137,7 @@ function buildStockMaps(exclude_remito_id=null){
   (data.compras||[]).forEach(c=>(c.items||[]).forEach(it=>{if(it.articulo_id)compMap[it.articulo_id]=(compMap[it.articulo_id]||0)+(it.cantidad||0)}));
   (data.remitos_venta||[]).forEach(r=>{
     if(r.id===exclude_remito_id)return;
-    const factor=(r.tipo_remito==='devolucion')?-1:1;
+    const factor=(r.tipo_remito==='devolucion'||r.tipo_remito==='ajuste_entrada')?-1:1;
     (r.items||[]).forEach(it=>{if(it.articulo_id)remMap[it.articulo_id]=(remMap[it.articulo_id]||0)+(it.cantidad||0)*factor});
   });
   return{compMap,remMap};
@@ -2267,8 +2330,149 @@ function nextRemitoNum(){
   const maxN=Math.max(...same.map(r=>parseInt((r.numero_remito||'').replace(prefix,''))||0));
   return prefix+String(maxN+1).padStart(3,'0');
 }
+
+// =====================================================================
+// AJUSTES DE STOCK / DEVOLUCIONES
+// =====================================================================
+const TIPOS_AJUSTE={
+  ajuste_baja:{label:'Baja / Daño',badge:'<span class="badge bg-danger">Baja</span>',dir:'salida'},
+  devolucion:{label:'Devolución cliente',badge:'<span class="badge bg-warning text-dark">Devolución</span>',dir:'entrada'},
+  ajuste_entrada:{label:'Ajuste / Hallazgo',badge:'<span class="badge bg-success">Ajuste entrada</span>',dir:'entrada'},
+};
+function _ajusteTipos(){return Object.keys(TIPOS_AJUSTE);}
+function nextAjusteNum(tipo){
+  const year=new Date().getFullYear();
+  const pMap={ajuste_baja:'BJ',devolucion:'DV',ajuste_entrada:'AJ'};
+  const prefix=(pMap[tipo]||'AJ')+year+'-';
+  const same=(data.remitos_venta||[]).filter(r=>(r.numero_remito||'').startsWith(prefix));
+  if(!same.length)return prefix+'001';
+  const maxN=Math.max(...same.map(r=>parseInt((r.numero_remito||'').replace(prefix,''))||0));
+  return prefix+String(maxN+1).padStart(3,'0');
+}
+async function renderAjustes(){
+  const tb=document.getElementById('ajustes-tb');
+  if(!tb)return;
+  const ajustes=(data.remitos_venta||[]).filter(r=>_ajusteTipos().includes(r.tipo_remito));
+  if(!ajustes.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="bi bi-arrow-left-right"></i>Sin ajustes registrados</div></td></tr>`;return;}
+  const arts=data.articulos||[];const artMap={};arts.forEach(a=>artMap[a.id]=a.nombre);
+  tb.innerHTML=[...ajustes].sort((a,b)=>b.id-a.id).map(r=>{
+    const info=TIPOS_AJUSTE[r.tipo_remito]||{label:r.tipo_remito,badge:'<span class="badge bg-secondary">?</span>'};
+    const firstItem=(r.items&&r.items[0])||null;
+    const artName=firstItem?artMap[firstItem.articulo_id]||'–':'–';
+    const cant=firstItem?(firstItem.cantidad||0):0;
+    const extraItems=(r.items||[]).length>1?` <span class="badge bg-light text-dark border">+${(r.items||[]).length-1} más</span>`:'';
+    return`<tr>
+      <td><span class="lbadge">${r.numero_remito||'S/N'}</span></td>
+      <td>${info.badge}</td>
+      <td>${artName}${extraItems}</td>
+      <td class="fw-semibold">${cant}</td>
+      <td class="small text-muted">${r.observaciones||'–'}</td>
+      <td>${fmtDate(r.fecha)}</td>
+      <td class="no-print" style="white-space:nowrap">
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="editAjuste(${r.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="delAjuste(${r.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+      </td></tr>`;
+  }).join('');
+}
+async function abrirModalAjuste(id=null){
+  document.getElementById('aj-id').value='';
+  document.getElementById('aj-tipo').value='';
+  document.getElementById('aj-cant').value='';
+  document.getElementById('aj-motivo').value='';
+  document.getElementById('aj-stock-ro').value='';
+  document.getElementById('aj-alerta').classList.add('d-none');
+  document.getElementById('aj-num').value='';
+  document.getElementById('aj-fecha').value=new Date().toISOString().slice(0,10);
+  const arts=data.articulos||[];
+  const artSel=document.getElementById('aj-art');
+  artSel.innerHTML='<option value="">-- Seleccionar artículo --</option>'+arts.map(a=>`<option value="${a.id}">${a.nombre}${a.unidad?' ('+a.unidad+')':''}</option>`).join('');
+  if(id){
+    const r=(data.remitos_venta||[]).find(x=>x.id===id);
+    if(r){
+      document.getElementById('aj-id').value=r.id;
+      document.getElementById('aj-tipo').value=r.tipo_remito;
+      document.getElementById('aj-num').value=r.numero_remito||'';
+      document.getElementById('aj-fecha').value=r.fecha||'';
+      document.getElementById('aj-motivo').value=r.observaciones||'';
+      const firstItem=(r.items&&r.items[0])||null;
+      if(firstItem){
+        artSel.value=firstItem.articulo_id||'';
+        document.getElementById('aj-cant').value=firstItem.cantidad||'';
+        ajOnArtChange();
+      }
+    }
+  }
+  new bootstrap.Modal(document.getElementById('mAjuste')).show();
+}
+function editAjuste(id){abrirModalAjuste(id);}
+function ajOnTipoChange(){
+  const tipo=document.getElementById('aj-tipo').value;
+  const numEl=document.getElementById('aj-num');
+  if(tipo&&!numEl.value)numEl.value=nextAjusteNum(tipo);
+  const info=TIPOS_AJUSTE[tipo];
+  const al=document.getElementById('aj-alerta');
+  if(info){
+    al.classList.remove('d-none');
+    al.className='alert py-2 '+(info.dir==='entrada'?'alert-success':'alert-danger');
+    al.innerHTML=info.dir==='entrada'
+      ?'<i class="bi bi-arrow-up-circle me-1"></i>Este ajuste <strong>suma</strong> unidades al stock disponible.'
+      :'<i class="bi bi-arrow-down-circle me-1"></i>Este ajuste <strong>resta</strong> unidades del stock disponible.';
+  } else {al.classList.add('d-none');}
+}
+function ajOnArtChange(){
+  const artId=Number(document.getElementById('aj-art').value)||null;
+  if(!artId){document.getElementById('aj-stock-ro').value='';return;}
+  const stock=calcStockArticulo(artId);
+  const arts=data.articulos||[];const art=arts.find(a=>a.id===artId);
+  document.getElementById('aj-stock-ro').value=stock+(art&&art.unidad?' '+art.unidad:'');
+}
+async function guardarAjuste(){
+  const tipo=document.getElementById('aj-tipo').value;
+  const artId=Number(document.getElementById('aj-art').value)||null;
+  const cant=parseFloat(document.getElementById('aj-cant').value)||0;
+  const motivo=document.getElementById('aj-motivo').value.trim();
+  const fecha=document.getElementById('aj-fecha').value;
+  const num=document.getElementById('aj-num').value.trim();
+  const idVal=Number(document.getElementById('aj-id').value)||null;
+  if(!tipo){toast('Seleccioná un tipo de ajuste','e');return;}
+  if(!artId){toast('Seleccioná un artículo','e');return;}
+  if(!cant||cant<=0){toast('Ingresá una cantidad válida','e');return;}
+  if(!fecha){toast('Ingresá la fecha','e');return;}
+  // Para ajuste_baja validar que haya stock suficiente
+  if(tipo==='ajuste_baja'){
+    const stockActual=calcStockArticulo(artId,idVal);
+    if(cant>stockActual){
+      toast(`Stock insuficiente. Disponible: ${stockActual}`,'e');return;
+    }
+  }
+  const obj={
+    tipo_remito:tipo,
+    numero_remito:num||nextAjusteNum(tipo),
+    fecha,
+    observaciones:motivo||null,
+    cliente_id:null,
+    matricula:null,
+    items:[{articulo_id:artId,cantidad:cant,tipo:'articulo'}],
+  };
+  if(idVal)obj.id=idVal;
+  const ok=await dbPut('remitos_venta',obj);
+  if(!ok)return;
+  bootstrap.Modal.getInstance(document.getElementById('mAjuste')).hide();
+  toast('Ajuste guardado','s');
+  await recargarDatos();
+  renderAjustes();
+}
+async function delAjuste(id){
+  if(!confirm('¿Eliminar este ajuste? El stock se recalculará.'))return;
+  await dbDel('remitos_venta',id);
+  await recargarDatos();
+  renderAjustes();
+}
+
 async function renderRemitosVenta(){
-  const[rems,{cM}]=await Promise.all([dbAll('remitos_venta'),getMaps()]);
+  const[allRems,{cM}]=await Promise.all([dbAll('remitos_venta'),getMaps()]);
+  // Solo mostrar egresos normales y devoluciones (no ajustes de stock)
+  const rems=allRems.filter(r=>!['ajuste_baja','ajuste_entrada'].includes(r.tipo_remito));
   const tb=document.getElementById('remitos-venta-tb');
   if(!rems.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty-state"><i class="bi bi-receipt"></i>Sin remitos de venta</div></td></tr>`;return}
   tb.innerHTML=[...rems].sort((a,b)=>b.id-a.id).map(r=>{
