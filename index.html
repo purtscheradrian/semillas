@@ -2482,61 +2482,114 @@ async function imprimirRemito(id){
     else desc=it.descripcion||'–';
     const totalStr=it.total?fmt(it.total)+(it.undCont?' '+it.undCont:''):(it.tipo==='lote'&&it.cantidad?fmt(it.cantidad)+' kg':'–');
     const cantLabel=it.artObj&&it.artObj.contenido?`${it.cantidad||'–'} ${it.artObj.unidad||''}`:(it.tipo==='lote'?`${it.cantidad||'–'} kg`:`${it.cantidad||'–'} ${it.unidad||''}`);
-    return`<tr><td style="padding:2px 3px;border:1px solid #e2e8f0">${desc}</td><td style="padding:2px 3px;border:1px solid #e2e8f0;text-align:center">${cantLabel}</td><td style="padding:2px 3px;border:1px solid #e2e8f0;text-align:right;font-weight:700">${totalStr}</td></tr>`;
+    return`<tr style="border-bottom:1.5px solid #ddd"><td style="padding:5px 2px;font-size:11px;font-weight:700;vertical-align:top">${desc}</td><td style="padding:5px 2px;text-align:center;font-size:11px;font-weight:700;vertical-align:top;white-space:nowrap">${cantLabel}</td><td style="padding:5px 2px;text-align:right;font-size:12px;font-weight:900;vertical-align:top;white-space:nowrap">${totalStr}</td></tr>`;
   }).join('');
 
   const esDevPDF=r.tipo_remito==='devolucion';
-  const remitoCopy=(copia)=>`<div style="font-family:Arial,sans-serif;font-size:8px;color:#1a202c">
-    <div style="text-align:center;margin-bottom:4px">
-      <img src="https://purtscheradrian.github.io/semillas/logo.jpg" style="height:28px;width:auto;margin-bottom:3px;display:block;margin-left:auto;margin-right:auto" onerror="this.style.display='none'">
-      <div style="font-size:8px;font-weight:700;color:#2d6a4f">AGRO MIGUELETE SA</div>
-      <div style="font-size:6px;color:#64748b">RUT 040142120013 · J. Artigas s/n, Miguelete, Colonia</div>
-      <div style="margin:3px 0;border-top:1.5px solid ${esDevPDF?'#f59e0b':'#74c69d'};border-bottom:1.5px solid ${esDevPDF?'#f59e0b':'#74c69d'};padding:2px 0">
-        <div style="font-size:11px;font-weight:800;color:${esDevPDF?'#92400e':'#2d6a4f'};letter-spacing:.5px">${esDevPDF?'↩ DEVOLUCIÓN':'SALIDA DEPÓSITO'}</div>
+  const accentColor=esDevPDF?'#92400e':'#2d6a4f';
+  const accentBorder=esDevPDF?'#f59e0b':'#6ee7b7';
+
+  const remitoCopy=(copia)=>`
+  <div style="width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#111;padding-bottom:8px">
+
+    <!-- ENCABEZADO -->
+    <div style="text-align:center;margin-bottom:7px">
+      <img src="https://purtscheradrian.github.io/semillas/logo.jpg"
+           style="height:42px;width:auto;display:block;margin:0 auto 5px" onerror="this.style.display='none'">
+      <div style="font-size:16px;font-weight:900;color:${accentColor};letter-spacing:.5px">AGRO MIGUELETE SA</div>
+      <div style="font-size:11px;color:#444;font-weight:600">RUT 040142120013</div>
+      <div style="font-size:11px;color:#444">J. Artigas s/n - Miguelete, Colonia</div>
+    </div>
+
+    <!-- BANDA TIPO DOCUMENTO -->
+    <div style="background:${accentColor};color:#fff;text-align:center;padding:6px 4px;margin-bottom:9px">
+      <div style="font-size:18px;font-weight:900;letter-spacing:1px">${esDevPDF?'DEVOLUCION':'SALIDA DEPOSITO'}</div>
+      <div style="font-size:11px;font-weight:700;opacity:.9">${copia}</div>
+    </div>
+
+    <!-- N° DOCUMENTO y FECHA -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+      <div>
+        <div style="font-size:10px;color:#666;font-weight:700;text-transform:uppercase">N. Documento</div>
+        <div style="font-size:17px;font-weight:900;color:${accentColor}">${r.numero_remito||'S/N'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:#666;font-weight:700;text-transform:uppercase">Fecha</div>
+        <div style="font-size:14px;font-weight:800">${fmtDate(r.fecha)}</div>
+        <div style="font-size:10px;color:#555">Emision: ${fechaImp}</div>
       </div>
     </div>
-    ${esDevPDF?`<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:4px;padding:2px 6px;margin-bottom:4px;font-size:7px;font-weight:700;color:#92400e;text-align:center">Los artículos vuelven al depósito</div>`:''}
-    <div style="display:flex;justify-content:space-between;margin-bottom:4px;align-items:flex-end">
-      <div><div style="font-size:6px;color:#94a3b8">N° DOCUMENTO</div><div style="font-size:11px;font-weight:700;background:${esDevPDF?'#fef3c7':'#e0f2fe'};color:${esDevPDF?'#92400e':'#0369a1'};padding:2px 6px;border-radius:4px;display:inline-block">${r.numero_remito||'S/N'}</div></div>
-      <div style="text-align:right"><div style="font-size:6px;color:#94a3b8">FECHA</div><div style="font-size:9px;font-weight:700">${fmtDate(r.fecha)}</div><div style="font-size:6px;color:#94a3b8">Emisión: ${fechaImp}</div></div>
+
+    <div style="border-top:2px dashed #999;margin-bottom:7px"></div>
+
+    <!-- DATOS CLIENTE -->
+    <div style="margin-bottom:7px">
+      <div style="font-size:10px;color:#666;font-weight:700;text-transform:uppercase;margin-bottom:2px">Cliente</div>
+      <div style="font-size:14px;font-weight:900">${cli.nombre||'--'}</div>
+      ${cli.rut?`<div style="font-size:11px;color:#444">RUT: <strong>${cli.rut}</strong></div>`:''}
+      ${cli.telefono?`<div style="font-size:11px;color:#444">Tel: ${cli.telefono}</div>`:''}
+      ${cli.direccion?`<div style="font-size:11px;color:#444">${cli.direccion}</div>`:''}
+      ${r.matricula?`<div style="font-size:11px;font-weight:800;margin-top:4px">MATRICULA: <span style="font-size:14px;letter-spacing:1px">${r.matricula}</span></div>`:''}
     </div>
-    <div style="border:1px solid #e2e8f0;border-radius:4px;padding:4px 6px;margin-bottom:4px">
-      <div style="font-size:6px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:1px">Cliente</div>
-      <div style="font-weight:700;font-size:9px">${cli.nombre||'–'}</div>
-      ${cli.rut?`<div style="font-size:7px;color:#64748b">RUT: ${cli.rut}</div>`:''}
-      ${cli.telefono?`<div style="font-size:7px;color:#64748b">Tel: ${cli.telefono}</div>`:''}
-      ${cli.direccion?`<div style="font-size:7px;color:#64748b">${cli.direccion}</div>`:''}
-      ${r.matricula?`<div style="font-size:7px;margin-top:3px"><strong>Matrícula:</strong> <span style="font-size:9px;font-weight:800;letter-spacing:.5px">${r.matricula}</span></div>`:''}
-    </div>
-    <table style="width:100%;border-collapse:collapse;font-size:7px;margin-bottom:4px">
-      <thead><tr>
-        <th style="background:#f0fdf4;color:#2d6a4f;padding:2px 3px;border:1px solid #c6e9d4;text-align:left">Descripción</th>
-        <th style="background:#f0fdf4;color:#2d6a4f;padding:2px 3px;border:1px solid #c6e9d4;text-align:center;width:50px">Cant.</th>
-        <th style="background:#f0fdf4;color:#2d6a4f;padding:2px 3px;border:1px solid #c6e9d4;text-align:right;width:55px">Total</th>
-      </tr></thead>
-      <tbody>${itemsHTML}</tbody>
-      <tfoot><tr style="background:#f0fdf4;font-weight:700">
-        <td style="padding:2px 3px;border:1px solid #c6e9d4;font-size:6px">TOTAL</td>
-        <td style="padding:2px 3px;border:1px solid #c6e9d4;text-align:center">–</td>
-        <td style="padding:2px 3px;border:1px solid #c6e9d4;text-align:right">${tTotal?fmt(tTotal)+(mixedUnits?'':firstUndCont?' '+firstUndCont:''):'–'}</td>
-      </tr></tfoot>
+
+    <div style="border-top:2px dashed #999;margin-bottom:7px"></div>
+
+    <!-- TABLA ITEMS -->
+    <div style="font-size:10px;color:#666;font-weight:700;text-transform:uppercase;margin-bottom:4px">Items entregados</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:3px">
+      <thead>
+        <tr style="border-bottom:2px solid ${accentColor}">
+          <th style="font-size:11px;font-weight:700;color:${accentColor};text-align:left;padding:4px 2px">Descripcion</th>
+          <th style="font-size:11px;font-weight:700;color:${accentColor};text-align:center;padding:4px 2px;width:38px">Cant.</th>
+          <th style="font-size:11px;font-weight:700;color:${accentColor};text-align:right;padding:4px 2px;width:44px">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHTML}
+      </tbody>
     </table>
-    ${r.observaciones?`<div style="font-size:7px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;padding:2px 5px;margin-bottom:4px">Obs: ${r.observaciones}</div>`:''}
-    <div style="display:flex;justify-content:space-around;margin-top:8px;padding-top:5px;border-top:1px dashed #e2e8f0">
-      <div style="text-align:center"><div style="font-size:6px;color:#94a3b8;margin-bottom:14px">Firma quien recibe</div><div style="border-top:1px solid #94a3b8;width:65px"></div></div>
-      <div style="text-align:center"><div style="font-size:6px;color:#94a3b8;margin-bottom:14px">Firma quien entrega</div><div style="border-top:1px solid #94a3b8;width:65px"></div></div>
+
+    <!-- TOTAL -->
+    <div style="border-top:2.5px solid ${accentColor};margin-top:5px;padding-top:6px;display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+      <div style="font-size:13px;font-weight:900;color:${accentColor}">TOTAL ENTREGADO</div>
+      <div style="font-size:16px;font-weight:900;color:${accentColor}">${tTotal?fmt(tTotal)+(mixedUnits?'':firstUndCont?' '+firstUndCont:''):'--'}</div>
     </div>
+
+    ${r.observaciones?`<div style="font-size:11px;color:#444;background:#f8fafc;border-left:3px solid ${accentBorder};padding:5px 7px;margin-bottom:9px"><strong>Obs:</strong> ${r.observaciones}</div>`:''}
+    ${esDevPDF?`<div style="border:2px solid #f59e0b;padding:5px 7px;font-size:11px;font-weight:700;color:#92400e;text-align:center;margin-bottom:9px">Los articulos retornan al deposito</div>`:''}
+
+    <!-- FIRMAS -->
+    <div style="border-top:2px dashed #999;padding-top:12px;margin-top:4px">
+      <div style="display:flex;justify-content:space-between">
+        <div style="text-align:center;width:46%">
+          <div style="height:28px"></div>
+          <div style="border-top:1.5px solid #333;padding-top:4px;font-size:11px;font-weight:700">Firma recibe</div>
+          <div style="font-size:10px;color:#666;margin-top:3px">Nombre:</div>
+          <div style="height:18px;border-bottom:1px solid #bbb;margin-top:3px"></div>
+        </div>
+        <div style="text-align:center;width:46%">
+          <div style="height:28px"></div>
+          <div style="border-top:1.5px solid #333;padding-top:4px;font-size:11px;font-weight:700">Firma entrega</div>
+          <div style="font-size:10px;color:#666;margin-top:3px">Nombre:</div>
+          <div style="height:18px;border-bottom:1px solid #bbb;margin-top:3px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:10px;color:#888;margin-top:10px;font-weight:600">AGRO MIGUELETE SA - ${fechaImp}</div>
   </div>`;
 
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <title>Salida Deposito ${r.numero_remito||'S/N'}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff;width:72mm;max-width:72mm;overflow:hidden}
-@page{size:80mm auto;margin:3mm 4mm}
-@media print{body{padding:0}}
+body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#111;background:#fff;width:74mm;max-width:74mm;overflow:hidden}
+@page{size:80mm auto;margin:3mm}
+@media print{body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.corte{page-break-after:always}
 </style></head><body>
-${remitoCopy('ORIGINAL')}
+<div class="corte">${remitoCopy('ORIGINAL - Cliente')}</div>
+${remitoCopy('DUPLICADO - Empresa')}
 </body></html>`;
 
   const win=window.open('','_blank','width=860,height=720');
