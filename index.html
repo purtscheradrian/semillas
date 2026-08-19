@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Semillas GE</title>
+<title>AGRO MIGUELETE SA</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2d6a4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Semillas GE">
+<meta name="apple-mobile-web-app-title" content="AGRO MIGUELETE">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{--sw:240px;--gd:#2d6a4f;--gm:#40916c;--gl:#74c69d;--cream:#f8f6f0}
 *{box-sizing:border-box}
@@ -124,8 +125,9 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 <!-- ===== PANTALLA LOGIN ===== -->
 <div id="login-screen">
   <div class="box">
-    <div style="font-size:3rem;margin-bottom:10px">🌿</div>
-    <h2>Sistema de Semillas</h2>
+    <img src="logo.jpg" alt="AGRO MIGUELETE SA" style="max-width:160px;margin-bottom:12px;border-radius:8px;display:block;margin-left:auto;margin-right:auto" onerror="this.style.display='none'">
+    <h2>AGRO MIGUELETE SA</h2>
+    <p style="font-size:.8rem;color:#64748b;margin-bottom:2px">RUT 040142120013</p>
     <p>Ingresá tus credenciales para continuar</p>
     <div class="mb-3 text-start">
       <label class="form-label fw-semibold" style="font-size:.85rem">Usuario</label>
@@ -149,15 +151,16 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
 <div id="app">
 <div id="topbar">
   <button class="hamburger" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-  <span id="topbar-title">Sistema de Semillas</span>
+  <span id="topbar-title">AGRO MIGUELETE SA</span>
 </div>
 <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <!-- ===== SIDEBAR ===== -->
 <nav id="sidebar">
   <div class="brand">
-    <p class="brand-title"><i class="bi bi-leaf-fill"></i> Sistema de Semillas</p>
-    <div class="brand-sub">Gestión integral de campo</div>
+    <img src="logo.jpg" alt="Logo" style="max-width:100px;max-height:46px;object-fit:contain;margin-bottom:6px;display:block" onerror="this.style.display='none'">
+    <p class="brand-title">AGRO MIGUELETE SA</p>
+    <div class="brand-sub">RUT 040142120013 · Miguelete, Colonia</div>
     <div class="folder-info" id="sb-folder" style="color:#a7f3d0;margin-top:4px">☁️ Nube activa</div>
     <div id="sb-usuario" style="color:#a7f3d0;font-size:.72rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
   </div>
@@ -223,6 +226,16 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
       <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-info bg-opacity-10 text-info"><i class="bi bi-cart-check"></i></div><div><div class="slabel">Compras registradas</div><div class="svalue" id="st-comp">–</div></div></div></div>
       <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-bookmark-check"></i></div><div><div class="slabel">Reservas activas</div><div class="svalue" id="st-res">–</div></div></div></div>
       <div class="col-6 col-md-3"><div class="stat-card"><div class="icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-receipt"></i></div><div><div class="slabel">Remitos emitidos</div><div class="svalue" id="st-remi">–</div></div></div></div>
+    </div>
+
+    <!-- Gráfico Ganancias por Servicio -->
+    <div class="mb-1 mt-2" style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#64748b">📊 Ganancias por Servicio</div>
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-bar-chart-fill me-1 text-success"></i>Ingresos por tipo de servicio (USD)</div>
+      <div class="card-body" style="position:relative;max-height:280px">
+        <canvas id="chart-servicios" style="max-height:260px"></canvas>
+        <div id="chart-servicios-empty" class="text-center text-muted py-4" style="display:none"><i class="bi bi-bar-chart" style="font-size:2rem;display:block;margin-bottom:8px"></i>Sin datos de costos registrados aún</div>
+      </div>
     </div>
 
     <!-- Tablas resumen -->
@@ -698,7 +711,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
       </div>
       <div class="col-md-4"><label class="form-label">Costo total ($)</label><input type="number" step="0.01" class="form-control" id="p-costo" oninput="calcR()"></div>
       <div class="col-md-4"><label class="form-label">Costo/kg (auto)</label><input type="number" class="form-control" id="p-ckg" readonly style="background:#f9f9f9"></div>
-      <div class="col-md-4"><label class="form-label">Moneda</label><select class="form-select" id="p-mon"><option>UYU</option><option>USD</option></select></div>
+      <div class="col-md-4"><label class="form-label">Moneda</label><select class="form-select" id="p-mon"><option>USD</option><option>UYU</option></select></div>
       <div class="col-12"><label class="form-label">Observaciones</label><textarea class="form-control" id="p-obs" rows="2"></textarea></div>
     </div>
   </div>
@@ -714,7 +727,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
       <div class="col-12"><label class="form-label">Descripción</label><textarea class="form-control" id="s-desc" rows="2"></textarea></div>
       <div class="col-md-4"><label class="form-label">Precio/kg</label><input type="number" step="0.0001" class="form-control" id="s-pkg"></div>
       <div class="col-md-4"><label class="form-label">Precio fijo</label><input type="number" step="0.01" class="form-control" id="s-fijo"></div>
-      <div class="col-md-4"><label class="form-label">Moneda</label><select class="form-select" id="s-mon"><option>UYU</option><option>USD</option></select></div>
+      <div class="col-md-4"><label class="form-label">Moneda</label><select class="form-select" id="s-mon"><option>USD</option><option>UYU</option></select></div>
     </div>
   </div>
   <div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-success btn-sm" onclick="guardarServicio()">Guardar</button></div>
@@ -732,7 +745,7 @@ body{background:var(--cream);font-family:'Segoe UI',sans-serif;margin:0}
       <div class="col-md-4"><label class="form-label">Precio/kg</label><input type="number" step="0.0001" class="form-control" id="cl-pkg" oninput="calcCL()"></div>
       <div class="col-md-4"><label class="form-label">Monto fijo</label><input type="number" step="0.01" class="form-control" id="cl-fijo" oninput="calcCL()"></div>
       <div class="col-md-6"><label class="form-label">Subtotal (auto)</label><input type="number" class="form-control" id="cl-sub" readonly style="background:#f9f9f9;font-weight:600"></div>
-      <div class="col-md-6"><label class="form-label">Moneda</label><select class="form-select" id="cl-mon"><option>UYU</option><option>USD</option></select></div>
+      <div class="col-md-6"><label class="form-label">Moneda</label><select class="form-select" id="cl-mon"><option>USD</option><option>UYU</option></select></div>
       <div class="col-12"><label class="form-label">Notas</label><input class="form-control" id="cl-notas"></div>
     </div>
   </div>
@@ -1411,7 +1424,7 @@ async function prepProc(){
   document.getElementById('p-obs').value='';document.getElementById('p-info').textContent='';document.getElementById('r-calc').textContent='–';document.getElementById('p-est-lote').value='';
   const [lotes,srvs]=await Promise.all([dbAll('lotes'),dbAll('servicios_limpieza')]);
   document.getElementById('p-lote').innerHTML='<option value="">-- Seleccione --</option>'+lotes.filter(l=>['Recibido','En proceso'].includes(l.estado)).map(l=>`<option value="${l.id}">${l.numero_lote}</option>`).join('');
-  document.getElementById('p-srv').innerHTML='<option value="">-- Sin servicio / Ingresar manual --</option>'+srvs.map(s=>`<option value="${s.id}">${s.nombre}${s.precio_kg?' · '+s.precio_kg+'/kg':s.precio_fijo?' · fijo $'+s.precio_fijo:''} (${s.moneda||'UYU'})</option>`).join('');
+  document.getElementById('p-srv').innerHTML='<option value="">-- Sin servicio / Ingresar manual --</option>'+srvs.map(s=>`<option value="${s.id}">${s.nombre}${s.precio_kg?' · '+s.precio_kg+'/kg':s.precio_fijo?' · fijo $'+s.precio_fijo:''} (${s.moneda||'USD'})</option>`).join('');
 }
 async function abrirModalProceso(){await prepProc();new bootstrap.Modal(document.getElementById('mProc')).show()}
 async function autoFillProc(){
@@ -1423,12 +1436,12 @@ async function editProc(id){
   const [p,lotes,srvs]=await Promise.all([dbGet('procesamientos',id),dbAll('lotes'),dbAll('servicios_limpieza')]);
   document.getElementById('p-id').value=p.id;
   document.getElementById('p-lote').innerHTML='<option value="">–</option>'+lotes.map(l=>`<option value="${l.id}"${l.id===p.lote_id?' selected':''}>${l.numero_lote}</option>`).join('');
-  document.getElementById('p-srv').innerHTML='<option value="">-- Sin servicio / Ingresar manual --</option>'+srvs.map(s=>`<option value="${s.id}"${s.id===p.servicio_id?' selected':''}>${s.nombre}${s.precio_kg?' · '+s.precio_kg+'/kg':s.precio_fijo?' · fijo $'+s.precio_fijo:''} (${s.moneda||'UYU'})</option>`).join('');
+  document.getElementById('p-srv').innerHTML='<option value="">-- Sin servicio / Ingresar manual --</option>'+srvs.map(s=>`<option value="${s.id}"${s.id===p.servicio_id?' selected':''}>${s.nombre}${s.precio_kg?' · '+s.precio_kg+'/kg':s.precio_fijo?' · fijo $'+s.precio_fijo:''} (${s.moneda||'USD'})</option>`).join('');
   document.getElementById('p-fecha').value=p.fecha_proceso||'';document.getElementById('p-kb').value=p.kg_bruto||'';document.getElementById('p-kf').value=p.kg_final||'';
   document.getElementById('p-km').value=p.kg_merma||'';
   document.getElementById('p-bq').value=p.bolsas_qty||'';document.getElementById('p-bk').value=p.bolsas_kg||'';
   document.getElementById('p-bbq').value=p.bigbags_qty||'';document.getElementById('p-bbk').value=p.bigbags_kg||'';
-  document.getElementById('p-costo').value=p.costo||'';document.getElementById('p-mon').value=p.moneda||'UYU';
+  document.getElementById('p-costo').value=p.costo||'';document.getElementById('p-mon').value=p.moneda||'USD';
   document.getElementById('p-obs').value=p.observaciones||'';document.getElementById('p-est-lote').value='';
   calcR();new bootstrap.Modal(document.getElementById('mProc')).show();
 }
@@ -1449,7 +1462,7 @@ async function autoFillCostoProc(){
   if(!sid)return;
   const s=await dbGet('servicios_limpieza',sid);
   if(!s)return;
-  document.getElementById('p-mon').value=s.moneda||'UYU';
+  document.getElementById('p-mon').value=s.moneda||'USD';
   const kf=parseFloat(document.getElementById('p-kf').value)||0;
   if(s.precio_kg&&kf){
     document.getElementById('p-costo').value=(s.precio_kg*kf).toFixed(2);
@@ -1529,12 +1542,12 @@ async function renderServicios(){
   const rows=await dbAll('servicios_limpieza');const tb=document.getElementById('servicios-tb');
   if(!rows.length){tb.innerHTML=`<tr><td colspan="6"><div class="empty-state"><i class="bi bi-cash-coin"></i>Sin servicios definidos</div></td></tr>`;return}
   tb.innerHTML=rows.map(s=>`<tr><td class="fw-semibold">${s.nombre}</td><td>${s.descripcion||'–'}</td>
-    <td class="text-end">${s.precio_kg?fmt(s.precio_kg,4):'–'}</td><td class="text-end">${s.precio_fijo?fmt(s.precio_fijo):'–'}</td><td>${s.moneda||'UYU'}</td>
+    <td class="text-end">${s.precio_kg?fmt(s.precio_kg,4):'–'}</td><td class="text-end">${s.precio_fijo?fmt(s.precio_fijo):'–'}</td><td>${s.moneda||'USD'}</td>
     <td class="no-print"><button class="btn btn-sm btn-outline-primary" onclick="editServicio(${s.id})"><i class="bi bi-pencil"></i></button>
     <button class="btn btn-sm btn-outline-danger ms-1" onclick="delServicio(${s.id})"><i class="bi bi-trash"></i></button></td></tr>`).join('');
 }
-function abrirModalServicio(){['s-id','s-nom','s-desc','s-pkg','s-fijo'].forEach(f=>document.getElementById(f).value='');document.getElementById('s-mon').value='UYU';new bootstrap.Modal(document.getElementById('mSrv')).show()}
-async function editServicio(id){const s=await dbGet('servicios_limpieza',id);document.getElementById('s-id').value=s.id;document.getElementById('s-nom').value=s.nombre||'';document.getElementById('s-desc').value=s.descripcion||'';document.getElementById('s-pkg').value=s.precio_kg||'';document.getElementById('s-fijo').value=s.precio_fijo||'';document.getElementById('s-mon').value=s.moneda||'UYU';new bootstrap.Modal(document.getElementById('mSrv')).show()}
+function abrirModalServicio(){['s-id','s-nom','s-desc','s-pkg','s-fijo'].forEach(f=>document.getElementById(f).value='');document.getElementById('s-mon').value='USD';new bootstrap.Modal(document.getElementById('mSrv')).show()}
+async function editServicio(id){const s=await dbGet('servicios_limpieza',id);document.getElementById('s-id').value=s.id;document.getElementById('s-nom').value=s.nombre||'';document.getElementById('s-desc').value=s.descripcion||'';document.getElementById('s-pkg').value=s.precio_kg||'';document.getElementById('s-fijo').value=s.precio_fijo||'';document.getElementById('s-mon').value=s.moneda||'USD';new bootstrap.Modal(document.getElementById('mSrv')).show()}
 async function guardarServicio(){const n=document.getElementById('s-nom').value.trim();if(!n){toast('Nombre obligatorio','e');return}const id=document.getElementById('s-id').value;const o={nombre:n,descripcion:document.getElementById('s-desc').value.trim(),precio_kg:parseFloat(document.getElementById('s-pkg').value)||null,precio_fijo:parseFloat(document.getElementById('s-fijo').value)||null,moneda:document.getElementById('s-mon').value};if(id)o.id=Number(id);await dbPut('servicios_limpieza',o);bootstrap.Modal.getInstance(document.getElementById('mSrv')).hide();toast('Servicio guardado');renderServicios()}
 async function delServicio(id){if(!confirm('¿Eliminar?'))return;await dbDel('servicios_limpieza',id);toast('Eliminado');renderServicios()}
 
@@ -1544,7 +1557,7 @@ async function delServicio(id){if(!confirm('¿Eliminar?'))return;await dbDel('se
 async function abrirCostoLote(lid){
   document.getElementById('cl-id').value='';document.getElementById('cl-lid').value=lid;
   ['cl-desc','cl-kg','cl-pkg','cl-fijo','cl-sub','cl-notas'].forEach(f=>document.getElementById(f).value='');
-  document.getElementById('cl-mon').value='UYU';
+  document.getElementById('cl-mon').value='USD';
   const srvs=await dbAll('servicios_limpieza');
   document.getElementById('cl-srv').innerHTML='<option value="">-- Manual --</option>'+srvs.map(s=>`<option value="${s.id}">${s.nombre}</option>`).join('');
   new bootstrap.Modal(document.getElementById('mCL')).show();
@@ -1552,7 +1565,7 @@ async function abrirCostoLote(lid){
 async function autoFillCosto(){
   const sid=Number(document.getElementById('cl-srv').value);if(!sid)return;
   const s=await dbGet('servicios_limpieza',sid);
-  if(s){document.getElementById('cl-desc').value=s.nombre;document.getElementById('cl-pkg').value=s.precio_kg||'';document.getElementById('cl-fijo').value=s.precio_fijo||'';document.getElementById('cl-mon').value=s.moneda||'UYU';calcCL()}
+  if(s){document.getElementById('cl-desc').value=s.nombre;document.getElementById('cl-pkg').value=s.precio_kg||'';document.getElementById('cl-fijo').value=s.precio_fijo||'';document.getElementById('cl-mon').value=s.moneda||'USD';calcCL()}
 }
 function calcCL(){const kg=parseFloat(document.getElementById('cl-kg').value)||0;const pkg=parseFloat(document.getElementById('cl-pkg').value)||0;const fijo=parseFloat(document.getElementById('cl-fijo').value)||0;document.getElementById('cl-sub').value=((kg*pkg)+fijo).toFixed(2)}
 async function guardarCostoLote(){
@@ -1567,7 +1580,7 @@ async function editCostoLote(id){
   const c=await dbGet('costos_lote',id);const srvs=await dbAll('servicios_limpieza');
   document.getElementById('cl-id').value=c.id;document.getElementById('cl-lid').value=c.lote_id;
   document.getElementById('cl-srv').innerHTML='<option value="">-- Manual --</option>'+srvs.map(s=>`<option value="${s.id}"${s.id===c.servicio_id?' selected':''}>${s.nombre}</option>`).join('');
-  document.getElementById('cl-desc').value=c.descripcion||'';document.getElementById('cl-kg').value=c.kg_aplicados||'';document.getElementById('cl-pkg').value=c.precio_kg||'';document.getElementById('cl-fijo').value=c.monto_fijo||'';document.getElementById('cl-sub').value=c.subtotal||'';document.getElementById('cl-mon').value=c.moneda||'UYU';document.getElementById('cl-notas').value=c.notas||'';
+  document.getElementById('cl-desc').value=c.descripcion||'';document.getElementById('cl-kg').value=c.kg_aplicados||'';document.getElementById('cl-pkg').value=c.precio_kg||'';document.getElementById('cl-fijo').value=c.monto_fijo||'';document.getElementById('cl-sub').value=c.subtotal||'';document.getElementById('cl-mon').value=c.moneda||'USD';document.getElementById('cl-notas').value=c.notas||'';
   new bootstrap.Modal(document.getElementById('mCL')).show();
 }
 async function delCostoLote(id){if(!confirm('¿Eliminar este costo?'))return;await dbDel('costos_lote',id);toast('Eliminado');generarInforme()}
@@ -1690,7 +1703,7 @@ async function generarInforme(){
           <td class="text-muted small">${p.servicio_id&&smM[p.servicio_id]?smM[p.servicio_id]:'–'}</td>
           <td>${p.costo?fmt(p.costo)+' '+p.moneda:'–'}</td>
         </tr>`}).join('')}
-        <tr class="table-success fw-bold"><td colspan="2">TOTALES</td><td>${fmt(tF)} kg</td><td class="text-danger">${fmt(tM)} kg</td><td>${tB||'–'}</td><td>${tBB||'–'}</td><td>${rend?rend+'%':'–'}</td><td></td><td>${tCP?fmt(tCP)+' UYU':'–'}</td></tr>
+        <tr class="table-success fw-bold"><td colspan="2">TOTALES</td><td>${fmt(tF)} kg</td><td class="text-danger">${fmt(tM)} kg</td><td>${tB||'–'}</td><td>${tBB||'–'}</td><td>${rend?rend+'%':'–'}</td><td></td><td>${tCP?fmt(tCP)+' USD':'–'}</td></tr>
         </tbody></table></div>`:'<p class="text-muted">Sin registros de procesamiento.</p>'}
     </div>
     <div class="mb-3"><div class="d-flex justify-content-between align-items-center mb-2">
@@ -1706,19 +1719,19 @@ async function generarInforme(){
           <td class="no-print"><button class="btn btn-sm btn-outline-primary" onclick="editCostoLote(${c.id})"><i class="bi bi-pencil"></i></button>
           <button class="btn btn-sm btn-outline-danger ms-1" onclick="delCostoLote(${c.id})"><i class="bi bi-trash"></i></button></td>
         </tr>`).join('')}
-        <tr class="table-warning fw-bold"><td colspan="4" class="text-end">TOTAL COSTOS</td><td>${fmt(tCE)}</td><td>UYU</td><td colspan="2"></td></tr>
+        <tr class="table-warning fw-bold"><td colspan="4" class="text-end">TOTAL COSTOS</td><td>${fmt(tCE)}</td><td>USD</td><td colspan="2"></td></tr>
         </tbody></table></div>`:`<div class="text-muted small p-2 border rounded">Sin costos aplicados. <span class="no-print">Hacé clic en "Agregar costo" para agregar.</span></div>`}
     </div>
     <div class="mb-3"><p class="inf-h6">Resumen Económico</p>
       <div class="row g-2">
         <div class="col-6 col-md-3"><div class="card text-center p-3 bg-success bg-opacity-10"><div class="text-muted small">Kg Final</div><div class="fw-bold fs-4 text-success">${fmt(tF)} kg</div></div></div>
         <div class="col-6 col-md-3"><div class="card text-center p-3 bg-warning bg-opacity-10"><div class="text-muted small">Rendimiento</div><div class="fw-bold fs-4 text-warning">${rend?rend+'%':'–'}</div></div></div>
-        <div class="col-6 col-md-3"><div class="card text-center p-3 bg-info bg-opacity-10"><div class="text-muted small">Costo proceso</div><div class="fw-bold fs-5">${tCP?fmt(tCP)+' UYU':'–'}</div></div></div>
-        <div class="col-6 col-md-3"><div class="card text-center p-3 bg-danger bg-opacity-10"><div class="text-muted small">Costos adicionales</div><div class="fw-bold fs-5">${tCE?fmt(tCE)+' UYU':'–'}</div></div></div>
+        <div class="col-6 col-md-3"><div class="card text-center p-3 bg-info bg-opacity-10"><div class="text-muted small">Costo proceso</div><div class="fw-bold fs-5">${tCP?fmt(tCP)+' USD':'–'}</div></div></div>
+        <div class="col-6 col-md-3"><div class="card text-center p-3 bg-danger bg-opacity-10"><div class="text-muted small">Costos adicionales</div><div class="fw-bold fs-5">${tCE?fmt(tCE)+' USD':'–'}</div></div></div>
       </div>
-      ${(tCP||tCE)&&tF?`<div class="alert alert-secondary mt-2 mb-0 small">Total costos: <strong>${fmt(tCP+tCE)} UYU</strong> · Costo/kg final: <strong>${fmt((tCP+tCE)/tF,4)} UYU/kg</strong></div>`:''}
+      ${(tCP||tCE)&&tF?`<div class="alert alert-secondary mt-2 mb-0 small">Total costos: <strong>${fmt(tCP+tCE)} USD</strong> · Costo/kg final: <strong>${fmt((tCP+tCE)/tF,4)} USD/kg</strong></div>`:''}
     </div>
-    <hr><div class="text-muted small text-center">Sistema de Limpieza de Semillas · Generado: ${fecha}</div>
+    <hr><div class="text-muted small text-center">AGRO MIGUELETE SA · RUT 040142120013 · Generado: ${fecha}</div>
   </div>`;
 }
 async function exportarPDF(){
@@ -1742,43 +1755,45 @@ async function exportarPDF(){
 <title>Informe ${l.numero_lote}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#1a202c;background:#fff;padding:16px 20px}
-h2{font-size:17px;color:#2d6a4f;font-weight:700;margin:0}
-.sec-title{font-size:11px;color:#2d6a4f;font-weight:700;border-bottom:2px solid #74c69d;padding-bottom:3px;margin:10px 0 6px}
-.two-col{display:flex;gap:14px;margin-bottom:10px}
+body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff;padding:3mm 4mm}
+h2{font-size:11px;color:#2d6a4f;font-weight:700;margin:0}
+.sec-title{font-size:8px;color:#2d6a4f;font-weight:700;border-bottom:1.5px solid #74c69d;padding-bottom:2px;margin:6px 0 4px}
+.two-col{display:flex;gap:6px;margin-bottom:6px}
 .two-col>div{flex:1}
-table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:10px}
-th{background:#f0fdf4;color:#2d6a4f;padding:5px 6px;text-align:left;border:1px solid #c6e9d4;font-weight:700}
-td{padding:4px 6px;border:1px solid #e2e8f0;vertical-align:top}
+table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:7px}
+th{background:#f0fdf4;color:#2d6a4f;padding:2px 3px;text-align:left;border:1px solid #c6e9d4;font-weight:700}
+td{padding:2px 3px;border:1px solid #e2e8f0;vertical-align:top}
 .num{text-align:right}
 .ok{color:#16a34a;font-weight:700}
 .bad{color:#dc3545}
 .tr-tot{background:#d1fae5;font-weight:700}
 .tr-cost{background:#fef9c3;font-weight:700}
-.lbadge{background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:6px;font-weight:700;font-size:13px;display:inline-block}
-.kpi-row{display:flex;gap:8px;margin-bottom:10px}
-.kpi{flex:1;border-radius:6px;padding:8px 10px;text-align:center;border:1px solid #e2e8f0}
-.kpi .kl{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
-.kpi .kv{font-size:15px;font-weight:700;margin-top:2px}
+.lbadge{background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-weight:700;font-size:9px;display:inline-block}
+.kpi-row{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.kpi{flex:1;min-width:30%;border-radius:4px;padding:4px 5px;text-align:center;border:1px solid #e2e8f0}
+.kpi .kl{font-size:6px;color:#64748b;text-transform:uppercase;letter-spacing:.3px}
+.kpi .kv{font-size:9px;font-weight:700;margin-top:1px}
 .kpi.g{border-color:#86efac;background:#f0fdf4}.kpi.g .kv{color:#16a34a}
 .kpi.y{border-color:#fde68a;background:#fefce8}.kpi.y .kv{color:#b45309}
 .kpi.b{border-color:#bae6fd;background:#f0f9ff}.kpi.b .kv{color:#0369a1}
 .kpi.r{border-color:#fca5a5;background:#fef2f2}.kpi.r .kv{color:#b91c1c}
-.qual-row{display:flex;gap:6px;margin-bottom:10px}
-.qual{flex:1;border:1px solid #e2e8f0;border-radius:4px;text-align:center;padding:6px 4px}
-.qual .ql{font-size:9px;color:#64748b;text-transform:uppercase}
-.qual .qv{font-size:12px;font-weight:700}
-.footer{text-align:center;color:#94a3b8;font-size:9px;margin-top:14px;padding-top:8px;border-top:1px solid #e2e8f0}
-.alert-box{background:#f8f9fa;border:1px solid #e2e8f0;border-radius:4px;padding:6px 10px;font-size:10px;margin-top:6px}
-@page{margin:12mm 14mm;size:A4}
+.qual-row{display:flex;gap:3px;margin-bottom:6px;flex-wrap:wrap}
+.qual{flex:1;min-width:28%;border:1px solid #e2e8f0;border-radius:3px;text-align:center;padding:3px 2px}
+.qual .ql{font-size:6px;color:#64748b;text-transform:uppercase}
+.qual .qv{font-size:8px;font-weight:700}
+.footer{text-align:center;color:#94a3b8;font-size:6px;margin-top:8px;padding-top:4px;border-top:1px solid #e2e8f0}
+.alert-box{background:#f8f9fa;border:1px solid #e2e8f0;border-radius:3px;padding:3px 5px;font-size:7px;margin-top:4px}
+@page{size:80mm auto;margin:3mm 4mm}
 @media print{body{padding:0}section{page-break-inside:avoid}}
 </style></head><body>
 
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-  <div><h2>INFORME DE LOTE</h2><div style="color:#64748b;font-size:10px;margin-top:2px">Limpieza y Acondicionamiento de Semillas</div></div>
-  <div style="text-align:right"><div class="lbadge">${l.numero_lote}</div><div style="margin-top:4px">${eB(l.estado)}</div><div style="color:#64748b;font-size:9px;margin-top:4px">Generado: ${fecha}</div></div>
+<div style="text-align:center;margin-bottom:6px">
+  <div style="font-size:10px;font-weight:800;color:#2d6a4f;letter-spacing:.5px">AGRO MIGUELETE SA</div>
+  <div style="font-size:6px;color:#64748b">RUT 040142120013 · J. Artigas s/n, Miguelete, Colonia</div>
+  <div style="margin:4px 0"><span class="lbadge">INFORME · ${l.numero_lote}</span></div>
+  <div style="font-size:7px;color:#64748b">${eB(l.estado)} &nbsp;·&nbsp; Generado: ${fecha}</div>
 </div>
-<hr style="border:none;border-top:2px solid #74c69d;margin-bottom:10px">
+<hr style="border:none;border-top:1.5px solid #74c69d;margin-bottom:6px">
 
 <section class="two-col">
   <div><div class="sec-title">Datos del Lote</div>
@@ -1817,7 +1832,7 @@ td{padding:4px 6px;border:1px solid #e2e8f0;vertical-align:top}
     <td class="num" style="font-weight:700;color:#16a34a">${r}</td>
     <td style="font-size:10px;color:#64748b">${p.servicio_id&&smM[p.servicio_id]?smM[p.servicio_id]:'–'}</td>
     <td class="num">${p.costo?fmt(p.costo)+' '+p.moneda:'–'}</td></tr>`}).join('')}
-    <tr class="tr-tot"><td colspan="2">TOTALES</td><td class="num">${fmt(tF)} kg</td><td class="num bad">${fmt(tM)} kg</td><td class="num">${tB||'–'}</td><td class="num">${tBB||'–'}</td><td class="num">${rend?rend+'%':'–'}</td><td></td><td class="num">${tCP?fmt(tCP)+' UYU':'–'}</td></tr>
+    <tr class="tr-tot"><td colspan="2">TOTALES</td><td class="num">${fmt(tF)} kg</td><td class="num bad">${fmt(tM)} kg</td><td class="num">${tB||'–'}</td><td class="num">${tBB||'–'}</td><td class="num">${rend?rend+'%':'–'}</td><td></td><td class="num">${tCP?fmt(tCP)+' USD':'–'}</td></tr>
     </tbody></table>`:'<p style="color:#94a3b8;margin-bottom:8px">Sin registros de procesamiento.</p>'}
 </section>
 
@@ -1826,7 +1841,7 @@ td{padding:4px 6px;border:1px solid #e2e8f0;vertical-align:top}
   ${lc.length?`<table>
     <thead><tr><th>Descripción</th><th class="num">Kg aplic.</th><th class="num">Precio/kg</th><th class="num">Monto fijo</th><th class="num">Subtotal</th><th>Moneda</th><th>Notas</th></tr></thead>
     <tbody>${lc.map(c=>`<tr><td>${c.descripcion}</td><td class="num">${c.kg_aplicados?fmt(c.kg_aplicados):'–'}</td><td class="num">${c.precio_kg?fmt(c.precio_kg,4):'–'}</td><td class="num">${c.monto_fijo?fmt(c.monto_fijo):'–'}</td><td class="num" style="font-weight:700">${fmt(c.subtotal)}</td><td>${c.moneda}</td><td style="font-size:10px">${c.notas||'–'}</td></tr>`).join('')}
-    <tr class="tr-cost"><td colspan="4" style="text-align:right">TOTAL COSTOS</td><td class="num">${fmt(tCE)}</td><td>UYU</td><td></td></tr>
+    <tr class="tr-cost"><td colspan="4" style="text-align:right">TOTAL COSTOS</td><td class="num">${fmt(tCE)}</td><td>USD</td><td></td></tr>
     </tbody></table>`:`<p style="color:#94a3b8;border:1px solid #e2e8f0;padding:6px 10px;border-radius:4px;margin-bottom:8px">Sin costos aplicados.</p>`}
 </section>
 
@@ -1835,13 +1850,13 @@ td{padding:4px 6px;border:1px solid #e2e8f0;vertical-align:top}
   <div class="kpi-row">
     <div class="kpi g"><div class="kl">Kg Final</div><div class="kv">${fmt(tF)} kg</div></div>
     <div class="kpi y"><div class="kl">Rendimiento</div><div class="kv">${rend?rend+'%':'–'}</div></div>
-    <div class="kpi b"><div class="kl">Costo proceso</div><div class="kv">${tCP?fmt(tCP)+' UYU':'–'}</div></div>
-    <div class="kpi r"><div class="kl">Costos adicionales</div><div class="kv">${tCE?fmt(tCE)+' UYU':'–'}</div></div>
+    <div class="kpi b"><div class="kl">Costo proceso</div><div class="kv">${tCP?fmt(tCP)+' USD':'–'}</div></div>
+    <div class="kpi r"><div class="kl">Costos adicionales</div><div class="kv">${tCE?fmt(tCE)+' USD':'–'}</div></div>
   </div>
-  ${(tCP||tCE)&&tF?`<div class="alert-box">Total costos: <strong>${fmt(tCP+tCE)} UYU</strong> &nbsp;·&nbsp; Costo/kg final: <strong>${fmt((tCP+tCE)/tF,4)} UYU/kg</strong></div>`:''}
+  ${(tCP||tCE)&&tF?`<div class="alert-box">Total costos: <strong>${fmt(tCP+tCE)} USD</strong> &nbsp;·&nbsp; Costo/kg final: <strong>${fmt((tCP+tCE)/tF,4)} USD/kg</strong></div>`:''}
 </section>
 
-<div class="footer">Sistema de Limpieza de Semillas &nbsp;·&nbsp; Generado: ${fecha}</div>
+<div class="footer">AGRO MIGUELETE SA &nbsp;·&nbsp; RUT 040142120013 &nbsp;·&nbsp; J. Artigas s/n, Miguelete, Colonia &nbsp;·&nbsp; Generado: ${fecha}</div>
 </body></html>`;
 
   const win=window.open('','_blank','width=860,height=720');
@@ -1902,6 +1917,46 @@ async function renderDashboard(){
   rtb.innerHTML=resActivas.length?resActivas.map(r=>`<tr>
     <td>${cM[r.cliente_id]||'–'}</td><td>${fmtDate(r.fecha)}</td>
     <td class="text-end fw-semibold">${(r.items||[]).length}</td></tr>`).join(''):'<tr><td colspan="3" class="text-center text-muted py-3">Sin reservas activas</td></tr>';
+
+  // === Gráfico Ganancias por Servicio ===
+  const costos=data.costos_lote||[];
+  const servicios=data.servicios_limpieza||[];
+  const srvNombre=Object.fromEntries(servicios.map(s=>[s.id,s.nombre]));
+  // Agrupar costos_lote por servicio_id, sumar subtotales
+  const porServicio={};
+  costos.forEach(c=>{
+    const key=c.servicio_id?srvNombre[c.servicio_id]||'Servicio #'+c.servicio_id:'Sin servicio / Manual';
+    porServicio[key]=(porServicio[key]||0)+(c.subtotal||0);
+  });
+  // También incluir costos de procesamientos agrupados por servicio
+  const procs2=data.procesamientos||[];
+  procs2.forEach(p=>{
+    if(p.costo&&p.costo>0){
+      const key=p.servicio_id?srvNombre[p.servicio_id]||'Servicio #'+p.servicio_id:'Proceso s/tarifa';
+      porServicio[key]=(porServicio[key]||0)+(p.costo||0);
+    }
+  });
+  const chartCanvas=document.getElementById('chart-servicios');
+  const chartEmpty=document.getElementById('chart-servicios-empty');
+  const labels=Object.keys(porServicio);
+  const valores=Object.values(porServicio);
+  if(!labels.length){
+    chartCanvas.style.display='none';chartEmpty.style.display='';
+  } else {
+    chartCanvas.style.display='';chartEmpty.style.display='none';
+    // Destruir instancia previa si existe
+    const prev=Chart.getChart(chartCanvas);if(prev)prev.destroy();
+    const colores=['#2d6a4f','#40916c','#52b788','#74c69d','#95d5b2','#b7e4c7','#d8f3dc','#1b4332','#081c15','#0369a1','#0284c7','#0ea5e9'];
+    new Chart(chartCanvas,{
+      type:'bar',
+      data:{labels,datasets:[{label:'USD',data:valores,backgroundColor:labels.map((_,i)=>colores[i%colores.length]),borderRadius:6,borderSkipped:false}]},
+      options:{
+        responsive:true,maintainAspectRatio:true,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' USD '+ctx.parsed.y.toLocaleString('es-UY',{minimumFractionDigits:2,maximumFractionDigits:2})}}},
+        scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+Number(v).toLocaleString('es-UY')},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}
+      }
+    });
+  }
 }
 
 // =====================================================================
@@ -2090,7 +2145,7 @@ async function editCompra(id){
   document.getElementById('cmp-prov').innerHTML='<option value="">-- Sin proveedor --</option>'+provs.map(p=>`<option value="${p.id}"${p.id===c.proveedor_id?' selected':''}>${p.nombre}</option>`).join('');
   renderCompraItems();new bootstrap.Modal(document.getElementById('mCompra')).show();
 }
-function addCompraItem(){_compraItems.push({articulo_id:null,lote_proveedor:'',cantidad:1,unidad:'kg',precio_unitario:null,moneda:'UYU'});renderCompraItems()}
+function addCompraItem(){_compraItems.push({articulo_id:null,lote_proveedor:'',cantidad:1,unidad:'kg',precio_unitario:null,moneda:'USD'});renderCompraItems()}
 function delCompraItem(i){_compraItems.splice(i,1);renderCompraItems()}
 async function renderCompraItems(){
   const arts=await dbAll('articulos');
@@ -2418,51 +2473,46 @@ async function imprimirRemito(id){
     else desc=it.descripcion||'–';
     const totalStr=it.total?fmt(it.total)+(it.undCont?' '+it.undCont:''):'–';
     const cantLabel=it.artObj&&it.artObj.contenido?`${it.cantidad||'–'} ${it.artObj.unidad||''}`:(`${it.cantidad||'–'} ${it.unidad||''}`);
-    return`<tr><td style="padding:4px 6px;border:1px solid #e2e8f0">${desc}</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:center">${cantLabel}</td><td style="padding:4px 6px;border:1px solid #e2e8f0;text-align:right;font-weight:700">${totalStr}</td></tr>`;
+    return`<tr><td style="padding:2px 3px;border:1px solid #e2e8f0">${desc}</td><td style="padding:2px 3px;border:1px solid #e2e8f0;text-align:center">${cantLabel}</td><td style="padding:2px 3px;border:1px solid #e2e8f0;text-align:right;font-weight:700">${totalStr}</td></tr>`;
   }).join('');
 
   const esDevPDF=r.tipo_remito==='devolucion';
-  const remitoCopy=(copia)=>`<div class="remito-half">
-    ${esDevPDF?`<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:5px;padding:3px 8px;margin-bottom:6px;font-size:9px;font-weight:700;color:#92400e;text-align:center">↩ NOTA DE DEVOLUCIÓN — Los artículos vuelven al depósito</div>`:''}
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
-      <div><div style="font-size:17px;font-weight:800;color:${esDevPDF?'#92400e':'#2d6a4f'};letter-spacing:-.3px">${esDevPDF?'DEVOLUCIÓN':'REMITO DE VENTA'}</div>
-        <div style="font-size:9px;color:#64748b;margin-top:1px">ERP Agropecuario</div></div>
-      <div style="text-align:right">
-        <div style="font-size:14px;font-weight:700;background:${esDevPDF?'#fef3c7':'#e0f2fe'};color:${esDevPDF?'#92400e':'#0369a1'};padding:3px 10px;border-radius:5px;display:inline-block">${r.numero_remito||'S/N'}</div>
-        <div style="font-size:9px;color:#64748b;margin-top:3px">Fecha: <strong>${fmtDate(r.fecha)}</strong></div>
-        <div style="font-size:8px;color:#94a3b8">Emisión: ${fechaImp} &nbsp;·&nbsp; <strong>${copia}</strong></div>
-      </div>
+  const remitoCopy=(copia)=>`<div style="font-family:Arial,sans-serif;font-size:8px;color:#1a202c">
+    <div style="text-align:center;margin-bottom:5px">
+      <div style="font-size:10px;font-weight:800;color:${esDevPDF?'#92400e':'#2d6a4f'}">${esDevPDF?'↩ DEVOLUCIÓN':'REMITO DE VENTA'}</div>
+      <div style="font-size:7px;color:#64748b">AGRO MIGUELETE SA · RUT 040142120013</div>
+      <div style="font-size:7px;color:#64748b">J. Artigas s/n, Miguelete, Colonia</div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:7px">
-      <div style="flex:1;border:1px solid #e2e8f0;border-radius:5px;padding:5px 8px">
-        <div style="font-size:8px;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-bottom:2px">Cliente</div>
-        <div style="font-weight:700;font-size:11px">${cli.nombre||'–'}</div>
-        ${cli.rut?`<div style="font-size:9px;color:#64748b">RUT: ${cli.rut}</div>`:''}
-        ${cli.telefono?`<div style="font-size:9px;color:#64748b">Tel: ${cli.telefono}</div>`:''}
-        ${cli.direccion?`<div style="font-size:9px;color:#64748b">${cli.direccion}</div>`:''}
-      </div>
-      <div style="min-width:120px;border:1px solid #e2e8f0;border-radius:5px;padding:5px 8px">
-        <div style="font-size:8px;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-bottom:2px">Matrícula que retira</div>
-        <div style="font-weight:800;font-size:15px;letter-spacing:1px">${r.matricula||'–'}</div>
-      </div>
+    ${esDevPDF?`<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:4px;padding:2px 6px;margin-bottom:4px;font-size:7px;font-weight:700;color:#92400e;text-align:center">Los artículos vuelven al depósito</div>`:''}
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <div><div style="font-size:7px;color:#94a3b8">N° REMITO</div><div style="font-size:12px;font-weight:700;background:${esDevPDF?'#fef3c7':'#e0f2fe'};color:${esDevPDF?'#92400e':'#0369a1'};padding:2px 6px;border-radius:4px;display:inline-block">${r.numero_remito||'S/N'}</div></div>
+      <div style="text-align:right"><div style="font-size:7px;color:#94a3b8">FECHA</div><div style="font-size:9px;font-weight:700">${fmtDate(r.fecha)}</div><div style="font-size:6px;color:#94a3b8">Emisión: ${fechaImp}</div></div>
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:10px;margin-bottom:6px">
+    <div style="border:1px solid #e2e8f0;border-radius:4px;padding:4px 6px;margin-bottom:4px">
+      <div style="font-size:6px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:1px">Cliente</div>
+      <div style="font-weight:700;font-size:9px">${cli.nombre||'–'}</div>
+      ${cli.rut?`<div style="font-size:7px;color:#64748b">RUT: ${cli.rut}</div>`:''}
+      ${cli.telefono?`<div style="font-size:7px;color:#64748b">Tel: ${cli.telefono}</div>`:''}
+      ${cli.direccion?`<div style="font-size:7px;color:#64748b">${cli.direccion}</div>`:''}
+      ${r.matricula?`<div style="font-size:7px;margin-top:3px"><strong>Matrícula:</strong> <span style="font-size:9px;font-weight:800;letter-spacing:.5px">${r.matricula}</span></div>`:''}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:7px;margin-bottom:4px">
       <thead><tr>
-        <th style="background:#f0fdf4;color:#2d6a4f;padding:4px 6px;border:1px solid #c6e9d4;text-align:left">Descripción</th>
-        <th style="background:#f0fdf4;color:#2d6a4f;padding:4px 6px;border:1px solid #c6e9d4;text-align:center;width:90px">Cantidad</th>
-        <th style="background:#f0fdf4;color:#2d6a4f;padding:4px 6px;border:1px solid #c6e9d4;text-align:right;width:100px">Total</th>
+        <th style="background:#f0fdf4;color:#2d6a4f;padding:2px 3px;border:1px solid #c6e9d4;text-align:left">Descripción</th>
+        <th style="background:#f0fdf4;color:#2d6a4f;padding:2px 3px;border:1px solid #c6e9d4;text-align:center;width:50px">Cant.</th>
+        <th style="background:#f0fdf4;color:#2d6a4f;padding:2px 3px;border:1px solid #c6e9d4;text-align:right;width:55px">Total</th>
       </tr></thead>
       <tbody>${itemsHTML}</tbody>
       <tfoot><tr style="background:#f0fdf4;font-weight:700">
-        <td style="padding:4px 6px;border:1px solid #c6e9d4;font-size:9px">TOTALES</td>
-        <td style="padding:4px 6px;border:1px solid #c6e9d4;text-align:center">–</td>
-        <td style="padding:4px 6px;border:1px solid #c6e9d4;text-align:right">${tTotal?fmt(tTotal)+(mixedUnits?'':firstUndCont?' '+firstUndCont:''):'–'}</td>
+        <td style="padding:2px 3px;border:1px solid #c6e9d4;font-size:6px">TOTAL</td>
+        <td style="padding:2px 3px;border:1px solid #c6e9d4;text-align:center">–</td>
+        <td style="padding:2px 3px;border:1px solid #c6e9d4;text-align:right">${tTotal?fmt(tTotal)+(mixedUnits?'':firstUndCont?' '+firstUndCont:''):'–'}</td>
       </tr></tfoot>
     </table>
-    ${r.observaciones?`<div style="font-size:9px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:3px 7px;margin-bottom:5px">Obs: ${r.observaciones}</div>`:''}
-    <div style="display:flex;justify-content:space-evenly;margin-top:6px;padding-top:5px;border-top:1px solid #e2e8f0">
-      <div style="text-align:center"><div style="font-size:8px;color:#94a3b8;margin-bottom:16px">Firma quien recibe</div><div style="border-top:1px solid #94a3b8;width:110px"></div></div>
-      <div style="text-align:center"><div style="font-size:8px;color:#94a3b8;margin-bottom:16px">Firma quien entrega</div><div style="border-top:1px solid #94a3b8;width:110px"></div></div>
+    ${r.observaciones?`<div style="font-size:7px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;padding:2px 5px;margin-bottom:4px">Obs: ${r.observaciones}</div>`:''}
+    <div style="display:flex;justify-content:space-around;margin-top:8px;padding-top:5px;border-top:1px dashed #e2e8f0">
+      <div style="text-align:center"><div style="font-size:6px;color:#94a3b8;margin-bottom:14px">Firma quien recibe</div><div style="border-top:1px solid #94a3b8;width:65px"></div></div>
+      <div style="text-align:center"><div style="font-size:6px;color:#94a3b8;margin-bottom:14px">Firma quien entrega</div><div style="border-top:1px solid #94a3b8;width:65px"></div></div>
     </div>
   </div>`;
 
@@ -2470,16 +2520,11 @@ async function imprimirRemito(id){
 <title>Remito ${r.numero_remito||'S/N'}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#1a202c;background:#fff}
-.remito-half{height:143mm;padding:8mm 12mm;overflow:hidden}
-.scissors{border-top:2px dashed #94a3b8;position:relative;height:11mm;display:flex;align-items:center;justify-content:center}
-.scissors::before{content:'✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂ ✂';font-size:11px;color:#cbd5e1;letter-spacing:4px;background:#fff;padding:0 8px;position:absolute}
-@page{size:A4;margin:0}
+body{font-family:Arial,Helvetica,sans-serif;font-size:8px;color:#1a202c;background:#fff}
+@page{size:80mm auto;margin:3mm 4mm}
 @media print{body{padding:0}}
 </style></head><body>
-${remitoCopy('ORIGINAL — Copia Cliente')}
-<div class="scissors"></div>
-${remitoCopy('DUPLICADO — Copia Empresa')}
+${remitoCopy('ORIGINAL')}
 </body></html>`;
 
   const win=window.open('','_blank','width=860,height=720');
@@ -2559,67 +2604,65 @@ function imprimirRegistroMuestreo(){
 
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
   <style>
-    @page{size:A4 portrait;margin:14mm 16mm}
-    body{font-family:Arial,sans-serif;color:#000;margin:0;font-size:9pt}
+    @page{size:80mm auto;margin:3mm 4mm}
+    body{font-family:Arial,sans-serif;color:#000;margin:0;font-size:7pt}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style></head><body>
 
   <!-- ENCABEZADO -->
-  <div style="display:flex;align-items:stretch;margin-bottom:16px;border:1.5px solid #2d6a4f">
-    <div style="background:#2d6a4f;color:#fff;padding:10px 16px;display:flex;flex-direction:column;justify-content:center;min-width:90px;text-align:center">
-      <div style="font-size:7pt;letter-spacing:.5px;opacity:.85">FECHA INGRESO</div>
-      <div style="font-size:14pt;font-weight:700;line-height:1.2">${fechaIngFmt}</div>
-    </div>
-    <div style="flex:1;padding:10px 16px;display:flex;align-items:center;justify-content:center;border-left:1.5px solid #2d6a4f;border-right:1.5px solid #2d6a4f">
-      <div style="font-size:18pt;font-weight:700;letter-spacing:2px;text-align:center">REGISTRO DE MUESTREO</div>
-    </div>
-    <div style="padding:10px 16px;display:flex;flex-direction:column;justify-content:center;text-align:center;min-width:90px">
-      <div style="font-size:7pt;letter-spacing:.5px;color:#555">N° INGRESO</div>
-      <div style="font-size:18pt;font-weight:700;color:#2d6a4f">${nIngreso}</div>
-    </div>
+  <div style="background:#2d6a4f;color:#fff;text-align:center;padding:5px 8px;margin-bottom:6px;border-radius:3px">
+    <div style="font-size:10pt;font-weight:700;letter-spacing:1px">REGISTRO DE MUESTREO</div>
+    <div style="font-size:6pt;opacity:.85">AGRO MIGUELETE SA · RUT 040142120013</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:7pt">
+    <div><strong>FECHA INGRESO:</strong> ${fechaIngFmt}</div>
+    <div><strong>N° INGRESO:</strong> ${nIngreso}</div>
   </div>
 
   <!-- DATOS DEL LOTE -->
   ${sec('Datos del Lote')}
-  ${row(fld('Productor / Empresa', cli.nombre||cli.razon_social||'', 2), fld('N° de Lote', lote.numero_lote||'', 1))}
-  ${row(fld('Especie', esp.nombre||'', 1), fld('Variedad / Cultivar', vr.nombre||'', 2))}
+  ${row(fld('Productor / Empresa', cli.nombre||cli.razon_social||'', 1))}
+  ${row(fld('N° de Lote', lote.numero_lote||'', 1), fld('Especie', esp.nombre||'', 1))}
+  ${row(fld('Variedad / Cultivar', vr.nombre||'', 1))}
 
   <!-- RECEPCIÓN -->
-  ${sec('Recepción — Material Sucio')}
-  ${row(fld('Kg sucios (entrada)', kgSuc, 1), fld('Cantidad de bolsas / big bags', '', 1), fld('Observaciones', '', 2))}
+  ${sec('Recepción')}
+  ${row(fld('Kg sucios (entrada)', kgSuc, 1), fld('Bolsas / big bags', '', 1))}
+  ${row(fld('Observaciones', '', 1))}
 
   <!-- PROCESAMIENTO -->
-  ${sec('Procesamiento — Material Limpio')}
-  ${row(fld('Kg limpios', '', 1), fld('Bolsas', '', 1), fld('Big bags', '', 1), fld('Envase (N° y peso)', '', 1))}
-  <div style="display:flex;gap:24px;margin-bottom:12px;align-items:center">
-    <div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.4px">Curado</div>
-    ${checkbox('Sí')}&nbsp;&nbsp;${checkbox('No')}
+  ${sec('Procesamiento')}
+  ${row(fld('Kg limpios', '', 1), fld('Bolsas', '', 1))}
+  ${row(fld('Big bags', '', 1), fld('Envase (N° y peso)', '', 1))}
+  <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center;font-size:6.5pt">
+    <div style="font-weight:700;text-transform:uppercase;color:#555">Curado</div>
+    ${checkbox('Sí')}&nbsp;${checkbox('No')}
     <div style="flex:1"></div>
-    <div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.4px">Tratamiento aplicado:</div>
-    <div style="flex:2;border-bottom:1.5px solid #333;min-height:20px">&nbsp;</div>
+    <div style="font-weight:700;color:#555">Tratamiento:</div>
+    <div style="flex:2;border-bottom:1px solid #333;min-height:16px">&nbsp;</div>
   </div>
 
-  <!-- EMBOLSADO / ETIQUETADO -->
-  ${sec('Embolsado y Etiquetado')}
-  ${row(fld('Lote (etiqueta)', '', 2), fld('Envase detalle', '', 2))}
+  <!-- EMBOLSADO -->
+  ${sec('Embolsado')}
+  ${row(fld('Lote (etiqueta)', '', 1), fld('Envase detalle', '', 1))}
   ${row(fld('Observaciones / Notas', '', 1))}
 
   <!-- FIRMAS -->
   ${sec('Responsables')}
-  <div style="display:flex;gap:32px;margin-top:4px">
+  <div style="display:flex;gap:10px;margin-top:3px">
     <div style="flex:1">
-      <div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.4px;margin-bottom:28px">Operario de Máquina</div>
-      <div style="border-bottom:1.5px solid #333">&nbsp;</div>
-      <div style="font-size:7.5pt;color:#777;text-align:center;margin-top:3px">Firma y aclaración</div>
+      <div style="font-size:6pt;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:18px">Operario</div>
+      <div style="border-bottom:1px solid #333">&nbsp;</div>
+      <div style="font-size:6pt;color:#777;text-align:center;margin-top:2px">Firma</div>
     </div>
     <div style="flex:1">
-      <div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.4px;margin-bottom:28px">Responsable de Muestreo</div>
-      <div style="border-bottom:1.5px solid #333">&nbsp;</div>
-      <div style="font-size:7.5pt;color:#777;text-align:center;margin-top:3px">${resp||'Firma y aclaración'}</div>
+      <div style="font-size:6pt;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:18px">Resp. Muestreo</div>
+      <div style="border-bottom:1px solid #333">&nbsp;</div>
+      <div style="font-size:6pt;color:#777;text-align:center;margin-top:2px">${resp||'Firma'}</div>
     </div>
     <div style="flex:1">
-      <div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:.4px;margin-bottom:28px">Fecha de Procesamiento</div>
-      <div style="border-bottom:1.5px solid #333">&nbsp;</div>
+      <div style="font-size:6pt;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:18px">Fecha Proc.</div>
+      <div style="border-bottom:1px solid #333">&nbsp;</div>
     </div>
   </div>
 
